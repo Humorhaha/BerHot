@@ -1,0 +1,12 @@
+# 知乎用户 url_token 列表
+# 从 URL 提取：zhihu.com/people/[这个字符串]
+# 格式：纯列表 或 { users: [...] }
+
+# 知名技术答主
+- excited-vczh         # 轮子哥（vczh）
+- kaiyuan-zhongwen     # 开源中文
+- mileijun             # 雷军
+
+# 示例（请替换为实际要爬取的用户）
+# - example-user-1
+# - example-user-2

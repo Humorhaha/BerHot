@@ -15,6 +15,7 @@ dependencies = [
     "openai>=1.0.0",
     "pyyaml>=6.0",
     "requests>=2.31.0",
+    "scrapy>=2.14.2",
 ]
 
 [dependency-groups]
@@ -24,6 +25,9 @@ dev = [
 viz = [
     "wordcloud>=1.9.0",
     "matplotlib>=3.7.0",
+]
+zhihu = [
+    "playwright>=1.40.0",
 ]
 
 [tool.pytest.ini_options]
