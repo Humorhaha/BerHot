@@ -1,0 +1,937 @@
+{
+  "site": "X / Twitter",
+  "source_accounts": [
+    "sherjilozair",
+    "simonyankaren",
+    "timnitGebru",
+    "soumithchintala",
+    "mrmarkhall",
+    "johnplattml",
+    "prafdhar",
+    "guestrin",
+    "YiMaTweets",
+    "hscienceadvisor",
+    "JitendraMalikCV",
+    "fox6alancollins",
+    "dorin_comaniciu",
+    "ch402",
+    "YanhengHe",
+    "saibaster",
+    "karpathy",
+    "_akhaliq",
+    "yeewhye",
+    "animesh_garg",
+    "AnthropicAI",
+    "OriolVinyalsML",
+    "vilholm79",
+    "felixwyw",
+    "ucl_nlp",
+    "sybilhyz",
+    "omerlevy_",
+    "rolandtannous",
+    "AIHealthMIT",
+    "aidangomez",
+    "brox",
+    "nvchawla",
+    "hochreitersepp",
+    "barret_zoph",
+    "TaouHuang",
+    "giacomo_snidero",
+    "DbrxMosaicAI",
+    "dbahdanau",
+    "RealAAAI",
+    "jimmybajimmyba",
+    "PrincetonCS",
+    "mlittmancs",
+    "katecrawford",
+    "pietrovischia",
+    "Wrever",
+    "earnmyturns",
+    "richardsocher",
+    "tristanharris",
+    "fvsmassa",
+    "ICCVConference",
+    "berkeley_ai",
+    "AiBreakfast",
+    "ericxing",
+    "xiaolonw",
+    "kangzhangmd",
+    "xai",
+    "danieldennett",
+    "stanfordnlp",
+    "saschacaron",
+    "ReflexRobot",
+    "stanford_ee",
+    "ZoubinGhahrama1",
+    "DeepLearningAI",
+    "lgraesser3",
+    "xu_sirui",
+    "DrJimFan",
+    "amandaaskell",
+    "sejnowski",
+    "zxlzr",
+    "kiwi_sherbet",
+    "hugoaerts",
+    "Berkeley_EECS",
+    "chenzhongwei1",
+    "pencinaphd",
+    "geoffreyirving",
+    "rosalindpicard",
+    "andrewemc",
+    "HopkinsEngineer",
+    "wooldridgemike",
+    "StanfordHAI",
+    "Vfrz525_",
+    "StanfordAILab",
+    "spadhi888",
+    "character_ai",
+    "tydsh",
+    "scott_e_reed",
+    "elonmusk",
+    "marionlepert",
+    "lborovc",
+    "eccvconf",
+    "DrSteveWBrown",
+    "Gradio",
+    "trnsltnl",
+    "MITEECS",
+    "SCSatCMU",
+    "Gyanjiang",
+    "johnschulman2",
+    "uclcs",
+    "neilhoulsby",
+    "bschoelkopf"
+  ],
+  "fetched_at_utc": "2026-04-01T04:39:42.538810+00:00",
+  "total_count": 92,
+  "texts": [
+    {
+      "post_id": "2038757654819160346",
+      "author": "timnitGebru",
+      "date": "2026-03-30T23:17:57+00:00",
+      "url": "https://x.com/timnitGebru/status/2038757654819160346",
+      "content_text": "RT @EgnaLegnaMDW: #Updates https://t.co/fLRj5LJSNV",
+      "retweet_count": 4,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038501458610630783",
+      "author": "timnitGebru",
+      "date": "2026-03-30T06:19:55+00:00",
+      "url": "https://x.com/timnitGebru/status/2038501458610630783",
+      "content_text": "RT @ifwhenhow: Families forcibly displaced and threatened constantly by U.S.-supported state violence.\n\nSupport @EgnaLegnaMDW mutual aid efforts for migrant domestic workers in Lebanon: https://t.co/wvkzhRb6Vr\n\nDonate to emergency relief efforts in South Lebanon: https://t.co/2CpIh46KIA",
+      "retweet_count": 40,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039032485020041445",
+      "author": "YiMaTweets",
+      "date": "2026-03-31T17:30:02+00:00",
+      "url": "https://x.com/YiMaTweets/status/2039032485020041445",
+      "content_text": "RT @IlirAliu_: A Mathematical Introduction to\nRobotic Manipulation.\n\n[📍Save for later]\n\nIt is a foundational robotics textbook that universities use to teach full graduate-level courses.\n\nFrom body motion to manipulation, grasping, control, and nonholonomic planning. This is the mathematical backbone behind robot arms and hands.\n\n📍https://t.co/qfj5Qh7C3R\n\n——\n\nWeekly robotics and AI insights.\nSubscribe free: https://t.co/9Nm01QUcw3",
+      "retweet_count": 83,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038990144775307529",
+      "author": "YiMaTweets",
+      "date": "2026-03-31T14:41:47+00:00",
+      "url": "https://x.com/YiMaTweets/status/2038990144775307529",
+      "content_text": "RT @huang_chao4969: Introducing CatchMe: Capture Your Entire Digital Footprint 🚀\n\n- 🦞 Lightweight digital footprint capture tool that records all your computer activities.\n- 🤖 Let AI agents query your work memories via CLI.\n- ✨ Truly understand your work habits and context.\n- 🔒 100% local data storage - complete privacy protection.\n\nCompatible with OpenClaw, Claude, Cursor & more AI agents~~Vectorless & powerful!\n\nGitHub: https://t.co/9slXsuOdOf\n\n💬 Comments and PRs are very welcome!\n\n#CatchMe #AIAgents",
+      "retweet_count": 23,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038990001871220805",
+      "author": "YiMaTweets",
+      "date": "2026-03-31T14:41:13+00:00",
+      "url": "https://x.com/YiMaTweets/status/2038990001871220805",
+      "content_text": "RT @hkudatascience: 🤖🌏 What does AI governance look like when you put HKU, Harvard, Tsinghua, and global industry leaders in the same room?\n\n🔗 https://t.co/Qh1TRho82B\n🚨 HKGAGC 2026’s registration deadline extended to 7 April!\n\n#HKGAGC2026 #AIGovernance #AIandSociety #HKU #HKUIDS #HKUIDEAS https://t.co/W7Qb60rVPV",
+      "retweet_count": 2,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038520367229419696",
+      "author": "YiMaTweets",
+      "date": "2026-03-30T07:35:04+00:00",
+      "url": "https://x.com/YiMaTweets/status/2038520367229419696",
+      "content_text": "See you at Seoul in July! https://t.co/FL5Sl94iSp",
+      "retweet_count": 9,
+      "like_count": 104
+    },
+    {
+      "post_id": "2038849654423798197",
+      "author": "karpathy",
+      "date": "2026-03-31T05:23:32+00:00",
+      "url": "https://x.com/karpathy/status/2038849654423798197",
+      "content_text": "New supply chain attack this time for npm axios, the most popular HTTP client library with 300M weekly downloads.\n\nScanning my system I found a use imported from googleworkspace/cli from a few days ago when I was experimenting with gmail/gcal cli. The installed version (luckily) resolved to an unaffected 1.13.5, but the project dependency is not pinned, meaning that if I did this earlier today the code would have resolved to latest and I'd be pwned.\n\nIt's possible to personally defend against these to some extent with local settings e.g. release-age constraints, or containers or etc, but I think ultimately the defaults of package management projects (pip, npm etc) have to change so that a single infection (usually luckily fairly temporary in nature due to security scanning) does not spread through users at random and at scale via unpinned dependencies.\n\nMore comprehensive article:\nhttps://t.co/EJAZbqAPIQ",
+      "retweet_count": 1071,
+      "like_count": 9923
+    },
+    {
+      "post_id": "2039099426313019405",
+      "author": "_akhaliq",
+      "date": "2026-03-31T21:56:02+00:00",
+      "url": "https://x.com/_akhaliq/status/2039099426313019405",
+      "content_text": "RT @HKydlicek: Oh shit, it seems like all the HF Research team pretraining data has been accidentally leaked to the public. The web, PDFs, and synthetic datasets are expode on hf FineData org...\n\nApparently, an intern used CC to push the data with private=False. https://t.co/gUcaKQBzxi",
+      "retweet_count": 51,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039088236216070312",
+      "author": "_akhaliq",
+      "date": "2026-03-31T21:11:34+00:00",
+      "url": "https://x.com/_akhaliq/status/2039088236216070312",
+      "content_text": "RT @NielsRogge: @LottoLabs Feel free to also crawl https://t.co/JZLFvrZlgW\n\nWe made a skill for it: https://t.co/2SHtcrnYBg",
+      "retweet_count": 6,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039029830323253546",
+      "author": "_akhaliq",
+      "date": "2026-03-31T17:19:29+00:00",
+      "url": "https://x.com/_akhaliq/status/2039029830323253546",
+      "content_text": "HandX\n\nScaling Bimanual Motion and Interaction Generation\n\npaper: https://t.co/vDI3xTQDMb https://t.co/SQV6ZlQZkE",
+      "retweet_count": 5,
+      "like_count": 27
+    },
+    {
+      "post_id": "2039011853460819999",
+      "author": "_akhaliq",
+      "date": "2026-03-31T16:08:03+00:00",
+      "url": "https://x.com/_akhaliq/status/2039011853460819999",
+      "content_text": "DreamLite\n\nA Lightweight On-Device Unified Model for Image Generation and Editing\n\npaper: https://t.co/C2bsvSmkTM https://t.co/oNMgcF3kcT",
+      "retweet_count": 3,
+      "like_count": 19
+    },
+    {
+      "post_id": "2039007111741366620",
+      "author": "_akhaliq",
+      "date": "2026-03-31T15:49:13+00:00",
+      "url": "https://x.com/_akhaliq/status/2039007111741366620",
+      "content_text": "GEditBench v2\n\nA Human-Aligned Benchmark for General Image Editing\n\npaper: https://t.co/0OJGlz69Tw https://t.co/zilKdhHyBK",
+      "retweet_count": 3,
+      "like_count": 17
+    },
+    {
+      "post_id": "2039006585188499744",
+      "author": "_akhaliq",
+      "date": "2026-03-31T15:47:07+00:00",
+      "url": "https://x.com/_akhaliq/status/2039006585188499744",
+      "content_text": "EpochX\n\nBuilding the Infrastructure for an Emergent Agent Civilization\n\npaper: https://t.co/Dhw9ZBgAhs https://t.co/GMn4zJUsnB",
+      "retweet_count": 6,
+      "like_count": 31
+    },
+    {
+      "post_id": "2039000804061847801",
+      "author": "_akhaliq",
+      "date": "2026-03-31T15:24:09+00:00",
+      "url": "https://x.com/_akhaliq/status/2039000804061847801",
+      "content_text": "Gen-Searcher\n\nReinforcing Agentic Search for Image Generation\n\npaper: https://t.co/Y6bM7LExjv https://t.co/59R6FiNqB9",
+      "retweet_count": 5,
+      "like_count": 21
+    },
+    {
+      "post_id": "2038998550881714402",
+      "author": "_akhaliq",
+      "date": "2026-03-31T15:15:11+00:00",
+      "url": "https://x.com/_akhaliq/status/2038998550881714402",
+      "content_text": "TAPS\n\nTask Aware Proposal Distributions for Speculative Sampling\n\npaper: https://t.co/hIdMwlTzFf https://t.co/9VADVLz6h0",
+      "retweet_count": 7,
+      "like_count": 23
+    },
+    {
+      "post_id": "2038801439766487310",
+      "author": "_akhaliq",
+      "date": "2026-03-31T02:11:56+00:00",
+      "url": "https://x.com/_akhaliq/status/2038801439766487310",
+      "content_text": "RT @UnslothAI: This model has been #1 trending for 3 weeks now.\n\nIt's Qwen3.5-27B fine-tuned on distilled data from Claude-4.6-Opus (reasoning). Trained via Unsloth.\n\nRuns locally on 16GB in 4-bit or 32GB in 8-bit.\n\nModel: https://t.co/6KgPDHCJZ3",
+      "retweet_count": 229,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038781960080822516",
+      "author": "_akhaliq",
+      "date": "2026-03-31T00:54:32+00:00",
+      "url": "https://x.com/_akhaliq/status/2038781960080822516",
+      "content_text": "RT @ggerganov: llama.cpp at 100k stars\n\nnow that 90% of the code worldwide is being written by AI agents, I predict that within 3-6 months, 90% of all AI agents will be running locally with llama.cpp 😄\n\nJokes aside, I am going to use this small milestone as an opportunity to reflect a bit on the project and the state of AI from the perspective of local applications. There is a lot to say and discuss and yet it feels less and less important to try to make a point. Opinions about viability of local LLMs are strongly polarized, details are overlooked, the scientific approach is lacking. Arguments are predominantly based on vibes and hype waves.\n\nOne thing is clear though - local LLMs are used more and more. I expect this trend to continue and likely 2026 will end up being one of the most important years for the local AI movement.\n\nI admit that I didn't expect the agentic era to come so quickly to the local LLM space. One year ago, the available models were too computationally expensive for doing long-context tasks. There wasn't an obvious path towards meaningful agentic applications. The memory and compute requirements were huge. Last summer, with the release of gpt-oss, things started to change. It was the first time we saw a glimpse of tool calling that actually works well within the resource constraints of our daily devices. Later in the year, even better models were released and by now, useful local agentic workflows are a reality.\n\nComparing local vs hosted capabilities at a given moment of time is pointless. To try put things into perspective:\n\n- We don't need frontier intelligence to automate searches and sending emails\n- We don't need trillion parameter models to be able to summarize articles or technical documents\n- We don't need massive GPU data centers to control our home appliances or turn the lights off in the garage\n\nI believe that there is a certain level of intelligence we as humans can comprehend and meaningfully utilize to improve our working process. Beyond that level, access to more intelligence becomes unnecessary at best and counterproductive at worst. I also believe that that level of useful artificial intelligence is completely within reach locally and it has always been just a matter of implementing the right software stack to bring it to the end user.\n\nWith llama.cpp, I am confident that we continue to be on the right track of building that software stack!\n\nThe llama.cpp project is going stronger than ever. With more than 1500 contributors, the project keeps growing steadily.\n\nFrom technical point of view, I think that llama.cpp + ggml is the only solution that actually makes sense. That is, the software stack must run efficiently on every possible device, hardware and operating system. The technology is too important to be vendor-locked. It has to be developed in the open, by the community, together with the independent hardware vendors. This is the only right way to build something that will truly make a difference in the long run.\n\nI won't try to convince you about what is currently and will be possible with local AI. We will just continue to build as usual. I am confident that after the smoke clears and we look objectively at what we have built together, the benefits will be obvious to everyone.\n\nBig shoutout to all llama.cpp maintainers. I feel extremely lucky to be able to work together with so many talented contributors. Every day I learn something new and I feel there is so much more cool stuff that we are going to build. Also, I am really thankful that the project continues to have reliable partners to support it!\n\nCheers!",
+      "retweet_count": 278,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038662774352474163",
+      "author": "_akhaliq",
+      "date": "2026-03-30T17:00:56+00:00",
+      "url": "https://x.com/_akhaliq/status/2038662774352474163",
+      "content_text": "RT @Hesamation: this model is an agentic treasure. it has been #1 trending for 3 weeks on @huggingface as mentioned by @danielhanchen. it's Qwen 3.5 27B fine-tuned on Opus 4.6 distilled data and beats Sonnet 4.5 on SWE-bench verified and more. \n\n\"Runs locally on 16GB in 4-bit or 32GB in 8-bit.\" https://t.co/3tM8vk1FGZ",
+      "retweet_count": 149,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038644377749258252",
+      "author": "_akhaliq",
+      "date": "2026-03-30T15:47:50+00:00",
+      "url": "https://x.com/_akhaliq/status/2038644377749258252",
+      "content_text": "PackForcing\n\nShort Video Training Suffices for Long Video Sampling and Long Context Inference\n\npaper: https://t.co/zfNNV2BMuC https://t.co/AvHqhAsqwo",
+      "retweet_count": 14,
+      "like_count": 63
+    },
+    {
+      "post_id": "2038643304728838319",
+      "author": "_akhaliq",
+      "date": "2026-03-30T15:43:34+00:00",
+      "url": "https://x.com/_akhaliq/status/2038643304728838319",
+      "content_text": "Out of Sight but Not Out of Mind\n\nHybrid Memory for Dynamic Video World Models\n\npaper: https://t.co/9bnjLgKDJF https://t.co/51ZKuWOmdd",
+      "retweet_count": 14,
+      "like_count": 75
+    },
+    {
+      "post_id": "2039137425214353555",
+      "author": "AnthropicAI",
+      "date": "2026-04-01T00:27:02+00:00",
+      "url": "https://x.com/AnthropicAI/status/2039137425214353555",
+      "content_text": "We've signed an MOU with the Australian Government to collaborate on AI safety research and support Australia's National AI Plan.\n\nRead more: https://t.co/lKOPIF6JBg",
+      "retweet_count": 79,
+      "like_count": 860
+    },
+    {
+      "post_id": "2038848878875726321",
+      "author": "HochreiterSepp",
+      "date": "2026-03-31T05:20:27+00:00",
+      "url": "https://x.com/HochreiterSepp/status/2038848878875726321",
+      "content_text": "A high-performance trading architecture built around xLSTM: https://t.co/wkh84dYSao\n\nThe model is used as a market-state encoder, while reinforcement learning handles the trading decisions. This performance of xLSTM should be confirmed  by further investigations. https://t.co/qeIy6bZfiq",
+      "retweet_count": 13,
+      "like_count": 127
+    },
+    {
+      "post_id": "2039064541548437754",
+      "author": "DbrxMosaicAI",
+      "date": "2026-03-31T19:37:25+00:00",
+      "url": "https://x.com/DbrxMosaicAI/status/2039064541548437754",
+      "content_text": "Applications are officially open for the Grounded Reasoning Cup at Data + AI Summit 2026! 🏆\n\nWe’re looking for students who want to:\n- Tackle high‑impact enterprise challenges\n- Showcase work to top researchers/engineers (with recruiters in the room)\n- Compete for $100k in model credit prizes\n\nApply here: https://t.co/bjinqjwuWr\nCompetition overview: https://t.co/5lUJHB9V8u",
+      "retweet_count": 7,
+      "like_count": 35
+    },
+    {
+      "post_id": "2038981552462258449",
+      "author": "PrincetonCS",
+      "date": "2026-03-31T14:07:39+00:00",
+      "url": "https://x.com/PrincetonCS/status/2038981552462258449",
+      "content_text": "RT @EPrinceton: @adjiboussodieng of @PrincetonCS was interviewed by\n@radiofrance_XIX about her work on the @UN panel on #AI. Composed of 40 experts, the panel will convene periodically over the next 3 years to produce reports. The French-language story is here: https://t.co/oGp0Wh3d7d",
+      "retweet_count": 1,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038694754863477045",
+      "author": "PrincetonCS",
+      "date": "2026-03-30T19:08:01+00:00",
+      "url": "https://x.com/PrincetonCS/status/2038694754863477045",
+      "content_text": "RT @adjiboussodieng: J’étais l’invitée de Charlotte Idrac sur @RFIAfrique ce matin, dans l’émission « Le Grand Invité Afrique ».\n\nNous avons parlé d’intelligence artificielle (#IA), du nouveau panel de l’ONU sur l’IA, de l’Afrique, de mon travail à TAIK (@theafricaiknow_) et à @Princeton, ainsi que de ma passion pour la connaissance en général et la science en particulier. \n\nRetrouvez l’intégralité de l’entretien ici : https://t.co/efu2di1WGQ",
+      "retweet_count": 65,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039040953818706253",
+      "author": "pietrovischia",
+      "date": "2026-03-31T18:03:41+00:00",
+      "url": "https://x.com/pietrovischia/status/2039040953818706253",
+      "content_text": "RT @MAECgob: España condena la aprobación de la ley en el Parlamento israelí sobre la pena de muerte en Israel y el territorio ocupado del Estado de Palestina.\n\n🔗 https://t.co/OWC7Pc6oET https://t.co/1Zcs3BPEUa",
+      "retweet_count": 112,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039040940103401771",
+      "author": "pietrovischia",
+      "date": "2026-03-31T18:03:38+00:00",
+      "url": "https://x.com/pietrovischia/status/2039040940103401771",
+      "content_text": "RT @Reuters: Spain has closed its airspace to US planes involved in attacks on Iran, a step beyond its previous denial of use of jointly-operated military bases https://t.co/cMTBq6X4x6 https://t.co/0ZzYvfAV2Z",
+      "retweet_count": 1368,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039040434777829529",
+      "author": "pietrovischia",
+      "date": "2026-03-31T18:01:37+00:00",
+      "url": "https://x.com/pietrovischia/status/2039040434777829529",
+      "content_text": "RT @aakashgupta: The reason software eats RAM is the same reason factories used to dump chemicals in rivers. The cost is externalized.\n\nEvery mass of inference compute shows up on an engineering manager's AWS bill, broken down to the cent, reviewed quarterly. Every mass of RAM consumed on YOUR machine shows up nowhere in anyone's budget. Chrome could cut memory usage by 60% tomorrow and Google's revenue wouldn't move a single basis point.\n\nDocker's 2GB idle footprint costs Docker Inc. exactly $0. Electron's 500MB todo list costs the Electron team exactly $0. The user paid for the RAM. The user pays the electricity. The user deals with the fan noise. The company ships faster because they chose the laziest possible runtime.\n\nThe token-optimization obsession makes this even clearer. Companies optimize inference cost because inference cost hits their margins. They'll spend six months shaving 200ms off a model response. They won't spend six days reducing a desktop client's memory footprint because that memory belongs to someone else's hardware.\n\nThis is why the 16GB vs 32GB debate is a trap. You're asking consumers to buy more expensive hardware to subsidize the software industry's refusal to optimize for a resource they never have to pay for.\n\nThe market will never fix this on its own. The people writing the checks and the people running out of RAM are on opposite sides of the transaction.",
+      "retweet_count": 1088,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039001181192700349",
+      "author": "pietrovischia",
+      "date": "2026-03-31T15:25:39+00:00",
+      "url": "https://x.com/pietrovischia/status/2039001181192700349",
+      "content_text": "RT @SpainMFA: Spain strongly condemns the latest attacks against the UNIFIL contingent, which have resulted in the deaths of three Indonesian soldiers, and extends its condolences to their families &amp; loved ones as well as to the Government and people of Indonesia.\n\n🔗\nhttps://t.co/UZxMqMdNpU https://t.co/vi3AVKoydf",
+      "retweet_count": 80,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038919121455169544",
+      "author": "pietrovischia",
+      "date": "2026-03-31T09:59:34+00:00",
+      "url": "https://x.com/pietrovischia/status/2038919121455169544",
+      "content_text": "RT @sanchezcastejon: En la madrugada de ayer, se cruzó una nueva línea roja en el Líbano. Un casco azul de la ONU murió en este ataque y otros tres resultaron heridos.\n\nEspaña condena tajantemente estos hechos. Exige que se aclare el origen del proyectil. Y pide al gobierno de Israel que detenga las hostilidades.\n\nLos ataques a las misiones de paz de la ONU son una agresión injustificable a toda la comunidad internacional.\n\nTrasladamos también nuestras sinceras condolencias a la familia del soldado fallecido y a todo el personal de FINUL.",
+      "retweet_count": 12426,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038892595783328088",
+      "author": "pietrovischia",
+      "date": "2026-03-31T08:14:10+00:00",
+      "url": "https://x.com/pietrovischia/status/2038892595783328088",
+      "content_text": "LoL but not LoL",
+      "retweet_count": 0,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038876155588059235",
+      "author": "pietrovischia",
+      "date": "2026-03-31T07:08:50+00:00",
+      "url": "https://x.com/pietrovischia/status/2038876155588059235",
+      "content_text": "RT @UKinJerusalem: Joint statement by 🇩🇪, 🇫🇷 , 🇮🇹 &amp; 🇬🇧 on Israel's Death Penalty Bill.\n\n“The death penalty is an inhumane and degrading form of punishment without any deterring effect. This is why we oppose the death penalty, whatever the circumstances around the world.”\n\n🔗 https://t.co/XLztRB2YqW",
+      "retweet_count": 375,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038658712676483307",
+      "author": "pietrovischia",
+      "date": "2026-03-30T16:44:48+00:00",
+      "url": "https://x.com/pietrovischia/status/2038658712676483307",
+      "content_text": "RT @GenAI_is_real: unpopular opinion: 16GB is plenty if software engineers actually cared about memory efficiency. chrome eating 4GB for 12 tabs is not a hardware problem its a software disgrace. docker consuming 2GB idle is not a feature its laziness. we live in an era where people optimize every single token to save $0.001 on API costs but happily ship electron apps that eat 500MB to display a todo list. if the industry treated RAM the way we treat inference compute - obsessively measuring every byte - 16GB would feel luxurious. the hardware isnt the problem, the software is @adxtyahq",
+      "retweet_count": 6532,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038989504598741330",
+      "author": "RichardSocher",
+      "date": "2026-03-31T14:39:15+00:00",
+      "url": "https://x.com/RichardSocher/status/2038989504598741330",
+      "content_text": "RT @IanOsband: It's a slippery slope, and I don't think it leads anywhere good...\n\nAt the very least I know of @RichardSocher actually doing pretrain-then-specialize in LMs much earlier:\n- 2011 EMNLP: https://t.co/o2yO51x0LA\n- 2014 PhD thesis: https://t.co/2OBKvyYLGD\n\nIf anything, I think these twitter celebs (Andrej included) tend to get *more* credit than they deserve, not less... in fact, that's exactly why I resurrected my twitter myself ;D",
+      "retweet_count": 1,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038671658391613573",
+      "author": "tristanharris",
+      "date": "2026-03-30T17:36:14+00:00",
+      "url": "https://x.com/tristanharris/status/2038671658391613573",
+      "content_text": "RT @rosenstein: \"Citizens' assemblies\" sound utopian until you see the track record.\n\nIreland used them to break decades of deadlock on abortion and marriage equality. They're already shaping AI policy in Taiwan, the UK, and Belgium.\n\nThink voluntary jury duty: everyday people, given extensive context and facilitation, setting binding rules and goals. They actually work.",
+      "retweet_count": 6,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038671580666929485",
+      "author": "tristanharris",
+      "date": "2026-03-30T17:35:56+00:00",
+      "url": "https://x.com/tristanharris/status/2038671580666929485",
+      "content_text": "From early employee at Facebook @rosenstein and co-inventor of “Like” button affirming the core problem presented in “The AI Doc” about the reckless race driving an anti-human future. Justin offers clear recommendations on how we need more democratic control, ownership and oversight of AI in order for it to serve the public’s interest. 👏",
+      "retweet_count": 13,
+      "like_count": 73
+    },
+    {
+      "post_id": "2038874831668531566",
+      "author": "ICCVConference",
+      "date": "2026-03-31T07:03:34+00:00",
+      "url": "https://x.com/ICCVConference/status/2038874831668531566",
+      "content_text": "Coming soon: #ICCV2027 Hong Kong 🇨🇳 https://t.co/2VuqhdNoSV",
+      "retweet_count": 18,
+      "like_count": 146
+    },
+    {
+      "post_id": "2038667266905014480",
+      "author": "AiBreakfast",
+      "date": "2026-03-30T17:18:47+00:00",
+      "url": "https://x.com/AiBreakfast/status/2038667266905014480",
+      "content_text": "Startup idea: \n\nOpenClaw agents rooting out government fraud for 30% bounties",
+      "retweet_count": 2,
+      "like_count": 16
+    },
+    {
+      "post_id": "2038772009367376351",
+      "author": "stanfordnlp",
+      "date": "2026-03-31T00:15:00+00:00",
+      "url": "https://x.com/stanfordnlp/status/2038772009367376351",
+      "content_text": "RT @oshaikh13: COLM and UIST deadline being on the same day really cursing my fellow HCI / NLP homies",
+      "retweet_count": 1,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038769436669456449",
+      "author": "stanfordnlp",
+      "date": "2026-03-31T00:04:46+00:00",
+      "url": "https://x.com/stanfordnlp/status/2038769436669456449",
+      "content_text": "RT @divy93t: I appreciate the history lesson @JeffDean and @chrmanning tend to add in their talks -- it helps to understand how the field has evolved! https://t.co/jjbXiOYMz6",
+      "retweet_count": 6,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038632142876598684",
+      "author": "stanfordnlp",
+      "date": "2026-03-30T14:59:13+00:00",
+      "url": "https://x.com/stanfordnlp/status/2038632142876598684",
+      "content_text": "RT @levidiamode: Day 85/365 of GPU Programming\n\nDoing another review day by going through Stanford's CS336 Lectures on GPUs and Kernels. \n\nThe lectures are a great recap of the GPU's execution model, how compute is scaling faster than memory, how TPUs are different in layout, roofline models, warp divergence, low precision, kernel fusion, torch.compile, coalescing, tiling, flash attention, profiling and triton. \n\nStanford's 2025 Language Modeling from Scratch course is by far the best course I've come across to learn about LLMs from a research perspective. @tatsu_hashimoto and @percyliang do an amazing job structuring and teaching a curriculum that guides you from the ground up through language models in 2025 (hopefully a 2026 version will be released soon!).",
+      "retweet_count": 36,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038630323152691205",
+      "author": "stanfordnlp",
+      "date": "2026-03-30T14:51:59+00:00",
+      "url": "https://x.com/stanfordnlp/status/2038630323152691205",
+      "content_text": "RT @BlancheMinerva: Really excellent work! I’ve been begging people to do serious social science research on social engagement with AI systems and it’s been lovely to see it start to take off over the past year or so.\n\nHannah Kirk @ UK AISI is another researcher doing great work like this",
+      "retweet_count": 7,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039096467676148045",
+      "author": "DeepLearningAI",
+      "date": "2026-03-31T21:44:17+00:00",
+      "url": "https://x.com/DeepLearningAI/status/2039096467676148045",
+      "content_text": "OpenAI partnered with Amazon to build infrastructure for agents on the world’s largest cloud platform, a further sign that its close relationship with Microsoft is weakening.\n\nLearn more in The Batch https://t.co/QcAMaZhI0L",
+      "retweet_count": 3,
+      "like_count": 14
+    },
+    {
+      "post_id": "2038650161807712322",
+      "author": "DeepLearningAI",
+      "date": "2026-03-30T16:10:49+00:00",
+      "url": "https://x.com/DeepLearningAI/status/2038650161807712322",
+      "content_text": "RT @OracleDevs: Learn more about our new short course with @DeepLearningAI, aimed at teaching AI developers and engineers how to architect and implement memory systems that give agents persistence, continuity, and the ability to learn over time. 🧠 https://t.co/TlF3qo67EE",
+      "retweet_count": 5,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038869328590754074",
+      "author": "xu_sirui",
+      "date": "2026-03-31T06:41:42+00:00",
+      "url": "https://x.com/xu_sirui/status/2038869328590754074",
+      "content_text": "Excited to share HandX at #CVPR2026!\n\n- Project: https://t.co/duulRLKzrP\n- Arxiv: https://t.co/s48dZ5JHAw\n- Code: https://t.co/AIBF70NC7Y\n\nExisting human motion generators produce convincing bodies but rigid, lifeless hands. HandX tackles this with:\n\n- 54.2 hours of high-fidelity bimanual motion, 490K fine-grained text annotations\n- Clear scaling trends: larger data + models = better generation\n- One model, versatile generation tasks\n- Seamlessly demonstrated in sim, then deployed on a real humanoid with dexterous hands",
+      "retweet_count": 53,
+      "like_count": 254
+    },
+    {
+      "post_id": "2038842208087159252",
+      "author": "zxlzr",
+      "date": "2026-03-31T04:53:56+00:00",
+      "url": "https://x.com/zxlzr/status/2038842208087159252",
+      "content_text": "RT @jocelynjshen: Excited to share our preprint \"The Hidden Puppet Master: Predicting Human Belief Change in Manipulative LLM Dialogues\"\n\n📄Paper: https://t.co/31bzOdrLRc https://t.co/HPozwkN4Cb",
+      "retweet_count": 24,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038842021037887523",
+      "author": "zxlzr",
+      "date": "2026-03-31T04:53:12+00:00",
+      "url": "https://x.com/zxlzr/status/2038842021037887523",
+      "content_text": "RT @yoonholeee: How can we autonomously improve LLM harnesses on problems humans are actively working on?\n\nDoing so requires solving a hard, long-horizon credit-assignment problem over all prior code, traces, and scores.\n\nAnnouncing Meta-Harness: a method for optimizing harnesses end-to-end",
+      "retweet_count": 252,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038602544205676896",
+      "author": "geoffreyirving",
+      "date": "2026-03-30T13:01:36+00:00",
+      "url": "https://x.com/geoffreyirving/status/2038602544205676896",
+      "content_text": "It is great for safety research when phenomena can be replicated with open-weight models!",
+      "retweet_count": 4,
+      "like_count": 43
+    },
+    {
+      "post_id": "2039070623519957376",
+      "author": "HopkinsEngineer",
+      "date": "2026-03-31T20:01:35+00:00",
+      "url": "https://x.com/HopkinsEngineer/status/2039070623519957376",
+      "content_text": "RT @AshleyKiemen: So excited to finally share this work! Our 3D mapping of inflammatory heterogeneity around pancreatic precancers is out today in @CellPressNews Blue! Huge thanks to @deniswirtz @ArrateMunoz @RalphHruban @lauradelongwood @Criis_perez99 @Valen_mat00s @andreforjaz",
+      "retweet_count": 11,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039061484148289880",
+      "author": "HopkinsEngineer",
+      "date": "2026-03-31T19:25:16+00:00",
+      "url": "https://x.com/HopkinsEngineer/status/2039061484148289880",
+      "content_text": "RT @matthew_d_green: Ok I just want to add one thing.\n\nFolks, for state actors, the value of having a quantum computer is massively higher if you DON’T tell people you have a quantum computer.\n\nExploiting Bitcoin is a parlor trick. Exploiting the world’s communications is where the value is at.",
+      "retweet_count": 89,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038988568530485551",
+      "author": "HopkinsEngineer",
+      "date": "2026-03-31T14:35:31+00:00",
+      "url": "https://x.com/HopkinsEngineer/status/2038988568530485551",
+      "content_text": "Bloomberg Distinguished Professor of Marine Robotics Jim Bellingham covered everything from hydrothermal vents and icy moons to jellyfish, sub design, and the future of AUVs during his Reddit AMA. Check out the full discussion: https://t.co/JHXBHdTUhS https://t.co/ZHAwDJrawQ",
+      "retweet_count": 1,
+      "like_count": 4
+    },
+    {
+      "post_id": "2038980746296082754",
+      "author": "HopkinsEngineer",
+      "date": "2026-03-31T14:04:27+00:00",
+      "url": "https://x.com/HopkinsEngineer/status/2038980746296082754",
+      "content_text": "RT @MASC_Conference: Exciting opportunity!\n\nMid-Atlantic Student Colloquium on AI, Language &amp; Learning (MASC-ALL 2026) is happening April 25 at @HowardU \n\nSubmit by April 13! https://t.co/H3pD9By7bp\n\nPresent your work + connect with others in NLP, speech &amp; AI  \n#MASCALL #NLP #AI #Research",
+      "retweet_count": 9,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038980707414954405",
+      "author": "HopkinsEngineer",
+      "date": "2026-03-31T14:04:17+00:00",
+      "url": "https://x.com/HopkinsEngineer/status/2038980707414954405",
+      "content_text": "RT @matthew_d_green: This is a great article on vulnerability research in the (coming) age of AI, by Thomas Ptacek. It mostly focuses on the fact that machines will soon supplant human vulnerability researchers. That’s sad! But my question is: do we get safer, or do we get less safe?",
+      "retweet_count": 7,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038961787941404883",
+      "author": "HopkinsEngineer",
+      "date": "2026-03-31T12:49:06+00:00",
+      "url": "https://x.com/HopkinsEngineer/status/2038961787941404883",
+      "content_text": "RT @itssaronsamuel: First conference presentation of my PhD done ✅ at ECIR yesterday!\n\nI presented our work on fairness in search, exploring whether reasoning in the reranking step can help make retrieval systems more equitable.\n\nYou can read the paper here: https://t.co/fbWCGUm4nY https://t.co/GGEA4NA0Jg",
+      "retweet_count": 5,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038650552733548590",
+      "author": "HopkinsEngineer",
+      "date": "2026-03-30T16:12:22+00:00",
+      "url": "https://x.com/HopkinsEngineer/status/2038650552733548590",
+      "content_text": "RT @JHUCompSci: Congratulations, @SamuelLefcourt! https://t.co/f97AKTL1dV",
+      "retweet_count": 1,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038646532019200282",
+      "author": "HopkinsEngineer",
+      "date": "2026-03-30T15:56:24+00:00",
+      "url": "https://x.com/HopkinsEngineer/status/2038646532019200282",
+      "content_text": "RT @JohnsHopkins: Bringing together nearly 200 studies and 30 million cells, Johns Hopkins researchers have enhanced a cellular road map of how the brain forms and adapts early in life. This research has the potential to offer new insight into conditions like autism and Alzheimer's. https://t.co/6r9hGSsmeM",
+      "retweet_count": 15,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038613837914452087",
+      "author": "HopkinsEngineer",
+      "date": "2026-03-30T13:46:29+00:00",
+      "url": "https://x.com/HopkinsEngineer/status/2038613837914452087",
+      "content_text": "RT @JHU_ChemBE: Yesterday, ChemBE had the honor of hosting our annual Holtz Lecture with Jay Keasling. A big thank you to Dr. Keasling for sharing his expertise, and to all the students, faculty, and staff who joined us for such an enriching event! https://t.co/hiwFp7I2Cg",
+      "retweet_count": 1,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038602430292599218",
+      "author": "HopkinsEngineer",
+      "date": "2026-03-30T13:01:09+00:00",
+      "url": "https://x.com/HopkinsEngineer/status/2038602430292599218",
+      "content_text": "RT @johnson111788: Following up on this — we’re looking for a 2026 summer intern at CCVL @ JHU to continue this line of work.\n\nIf you're interested in video generation + 3D-aware world models, feel free to reach out directly!\n\n#research #intern #jhu #ccvl",
+      "retweet_count": 6,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039025824318247078",
+      "author": "StanfordHAI",
+      "date": "2026-03-31T17:03:34+00:00",
+      "url": "https://x.com/StanfordHAI/status/2039025824318247078",
+      "content_text": "Stanford computer scientist @james_y_zou is exploring how AI can accelerate scientific research and peer review. His finding: AI excels at spotting gaps, but judgment calls still need humans. https://t.co/BvIO2vFWuu",
+      "retweet_count": 6,
+      "like_count": 25
+    },
+    {
+      "post_id": "2038759355391279195",
+      "author": "StanfordHAI",
+      "date": "2026-03-30T23:24:43+00:00",
+      "url": "https://x.com/StanfordHAI/status/2038759355391279195",
+      "content_text": "RT @DigEconLab: What would a \"theory\" of machine learning tell us?\n\nTuring winner  and Harvard Professor Leslie Valiant invented the widely accepted definition of supervised machine learning. Perspective, advice for new researchers and more on today’s episode!\n\n📼YouTube: https://t.co/1iw63IHbVW",
+      "retweet_count": 2,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038671001207062754",
+      "author": "scott_e_reed",
+      "date": "2026-03-30T17:33:38+00:00",
+      "url": "https://x.com/scott_e_reed/status/2038671001207062754",
+      "content_text": "🦾",
+      "retweet_count": 0,
+      "like_count": 4
+    },
+    {
+      "post_id": "2039199466331460057",
+      "author": "elonmusk",
+      "date": "2026-04-01T04:33:33+00:00",
+      "url": "https://x.com/elonmusk/status/2039199466331460057",
+      "content_text": "RT @JoNationLive: Picked up a pizza order. As I walked out, an elderly couple was getting out of their new Tesla Model Y. I said, “Beautiful car.” He said, “Thank you. It’s the best car I’ve ever owned.”\n\nI said, “Why?”\n\nHe said, “You see me—I’m 78 and can barely walk, let alone drive. I’m taking my wife out for date night again after 52 years of marriage. We couldn’t do this with our old car. I didn’t buy this to save the planet. I bought it to save me.” 😢\n\nAll choked up, I said, “Thank you for sharing. You two go enjoy your dinner!”\n\nI see and hear this so often from elderly people buying Teslas, but it never gets old. Tesla is freedom🫶🏻",
+      "retweet_count": 272,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039199299901526350",
+      "author": "elonmusk",
+      "date": "2026-04-01T04:32:54+00:00",
+      "url": "https://x.com/elonmusk/status/2039199299901526350",
+      "content_text": "RT @benjitaylor: I’ve been extremely impressed at just how much every engineer at 𝕏/xAI genuinely cares about design and craft. Everyone wants to go the extra mile, cares about the tiny details, and wants to work closely with design to make it happen. Breath of fresh air.",
+      "retweet_count": 45,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039199192288231835",
+      "author": "elonmusk",
+      "date": "2026-04-01T04:32:28+00:00",
+      "url": "https://x.com/elonmusk/status/2039199192288231835",
+      "content_text": "Sentient machines",
+      "retweet_count": 98,
+      "like_count": 1011
+    },
+    {
+      "post_id": "2039154596166451472",
+      "author": "elonmusk",
+      "date": "2026-04-01T01:35:16+00:00",
+      "url": "https://x.com/elonmusk/status/2039154596166451472",
+      "content_text": "RT @XFreeze: Grok Imagine is just amazing! https://t.co/VtZB0rcn3R",
+      "retweet_count": 292,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039116649539023320",
+      "author": "elonmusk",
+      "date": "2026-03-31T23:04:28+00:00",
+      "url": "https://x.com/elonmusk/status/2039116649539023320",
+      "content_text": "RT @ScottPresler: BREAKING \n\nMASSIVE NEWS \n\nPresident Trump just signed an Executive Order to provide for election integrity:\n\n1) Election officials will be provided w/ federal data to ensure that ONLY American citizens are able to vote\n\n2) Orders the Postmaster General & the United States Postal Service to verify that ballots are ONLY mailed to eligible voters \n\n& ballots are returned ONLY by eligible voters. \n\nThis is a huge step in the right direction. \n\nPass the SAVE America Act!",
+      "retweet_count": 11817,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039092094560878855",
+      "author": "elonmusk",
+      "date": "2026-03-31T21:26:54+00:00",
+      "url": "https://x.com/elonmusk/status/2039092094560878855",
+      "content_text": "RT @SOUJIJP: イーロンマスクの歴史的決断によって、日米のオールドメディアが、存在価値を失うかも知れない。日本と米国、英語圏の人たちの直接的な対話が促進され、メディアが隠していた情報も共有されることになり、メディアによる報道も世論操作も意味を持たなくなるかもしれない。シンギュラリティの始まりである。",
+      "retweet_count": 2872,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039091963530789342",
+      "author": "elonmusk",
+      "date": "2026-03-31T21:26:23+00:00",
+      "url": "https://x.com/elonmusk/status/2039091963530789342",
+      "content_text": "RT @WallStreetApes: Billionaire Chamath Palihapitiya explains that once he learned the mainstream media was lying to him, he left the Democrat Party\n\n“You went from being a large Democrat donor to now a very outspoken proponent on the other side of the aisle”\n\nChamath Palihapitiya “Yeah — This is not about politics for me, it's about the truth. There was a moment where I was basically like everybody else, and pretty brainwashed. \n\nMy media diet was very much the same as everybody else's. I read the New York Times and the Wall Street Journal. I watched a little bit of CNN, a little bit of CNBC, a little bit of MSNBC, a little bit of CBS Economist. \n\nEvery now and then you encounter it on a plane and you think you know what's going on, and I had a perception of Donald Trump initially, from the moment he walked down the staircase in Trump Tower to announce. \n\nAnd then over the course of 6-7 years, I realized that some of those fundamental things that I was told about him were just totally false. And there was enough content online where I was almost afraid, but it started with Charlottesville.\n\nI was almost afraid to look at it because I'm like, I think I was lied to. And then I saw it. I saw what he said, but then I saw the portrayal. I had originally believed that portrayal until I saw the truth. \n\nAnd then I just started to go down that rabbit hole. \n\nSo for me, it was an evolution where I was like, I can't believe I'm being lied to by this group of people whose sole responsibility is to hold truth, to power. The key word there is truth to power, not your perception or your desires. And I just think that that, that, I mean, red-pilled me, I guess in a way”",
+      "retweet_count": 5676,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039091131540209745",
+      "author": "elonmusk",
+      "date": "2026-03-31T21:23:04+00:00",
+      "url": "https://x.com/elonmusk/status/2039091131540209745",
+      "content_text": "The Model 3 is such a fun car",
+      "retweet_count": 4215,
+      "like_count": 55760
+    },
+    {
+      "post_id": "2039046398566625501",
+      "author": "elonmusk",
+      "date": "2026-03-31T18:25:19+00:00",
+      "url": "https://x.com/elonmusk/status/2039046398566625501",
+      "content_text": "Stand By Me",
+      "retweet_count": 16825,
+      "like_count": 230942
+    },
+    {
+      "post_id": "2039038898811343008",
+      "author": "elonmusk",
+      "date": "2026-03-31T17:55:31+00:00",
+      "url": "https://x.com/elonmusk/status/2039038898811343008",
+      "content_text": "Neuralink enables people with ALS to speak again",
+      "retweet_count": 7898,
+      "like_count": 57739
+    },
+    {
+      "post_id": "2039037419346145715",
+      "author": "elonmusk",
+      "date": "2026-03-31T17:49:38+00:00",
+      "url": "https://x.com/elonmusk/status/2039037419346145715",
+      "content_text": "💪",
+      "retweet_count": 8842,
+      "like_count": 86698
+    },
+    {
+      "post_id": "2039031274053210552",
+      "author": "elonmusk",
+      "date": "2026-03-31T17:25:13+00:00",
+      "url": "https://x.com/elonmusk/status/2039031274053210552",
+      "content_text": "Indeed, it was *because* I was not from the aerospace industry that SpaceX made such radical breakthroughs. Same for Tesla. \n\nThose in the industry would have if they could have.",
+      "retweet_count": 7885,
+      "like_count": 60485
+    },
+    {
+      "post_id": "2039029408045175155",
+      "author": "elonmusk",
+      "date": "2026-03-31T17:17:48+00:00",
+      "url": "https://x.com/elonmusk/status/2039029408045175155",
+      "content_text": "Working with a great team to build products people love is so wonderful",
+      "retweet_count": 4616,
+      "like_count": 53777
+    },
+    {
+      "post_id": "2038927562462949443",
+      "author": "elonmusk",
+      "date": "2026-03-31T10:33:06+00:00",
+      "url": "https://x.com/elonmusk/status/2038927562462949443",
+      "content_text": "RT @elonmusk: @mreiffy On the plus side, if you forgot the password to your wallet, it will be accessible in the future \n\nhttps://t.co/xAFtNGC5FE",
+      "retweet_count": 1327,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038923221702185078",
+      "author": "elonmusk",
+      "date": "2026-03-31T10:15:52+00:00",
+      "url": "https://x.com/elonmusk/status/2038923221702185078",
+      "content_text": "https://t.co/ztZUqahAmW",
+      "retweet_count": 6383,
+      "like_count": 46512
+    },
+    {
+      "post_id": "2038915152750473265",
+      "author": "elonmusk",
+      "date": "2026-03-31T09:43:48+00:00",
+      "url": "https://x.com/elonmusk/status/2038915152750473265",
+      "content_text": "RT @XFreeze: Grok 4.20 Beta ranks #2 with 97% accuracy score on the 𝜏²-Bench for Telecom (Agentic Tool Use)\n\nIt outperforms Claude Opus 4.6(max), GPT-5.4(xhigh), and Gemini 3.1 Pro, while closing in on GLM-5 scoring the top in agentic work flow\n\nTool calling is the whole game for AI agents, and this is where Grok 4.20 takes over\n\nwith state-of-the-art intelligence that fires up instantly, making it the fastest at tokens per sec in the industry",
+      "retweet_count": 769,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038915019216417172",
+      "author": "elonmusk",
+      "date": "2026-03-31T09:43:16+00:00",
+      "url": "https://x.com/elonmusk/status/2038915019216417172",
+      "content_text": "RT @tetsuoai: Grok Imagine will also add English if you prompt for it.\n\nimagine prompt:\n\nIn a scene reminiscent of Conan the Barbarian's epic fantasy world, a powerful and stunning woman exudes authority from atop a majestic throne. Her presence is both commanding and serene, evoking the untamed beauty and strength associated with Conan's universe. Flanking her on both the right and left are sleek black panthers, their muscular forms at rest yet brimming with potential energy. These majestic beasts serve not only as protectors but as symbols of her formidable power and connection to the wild. The air is charged with an ancient magic, as if the very scene is a gateway to realms untold, and she, its sovereign ruler, possesses the wisdom and ferocity of the ages. Ghost in the Shell 1995 cel animation style by Production I.G and Mamoru Oshii, authentic cel grain texture, classic 90s cel shading, extremely desaturated cold palette, dominant muted dark purple tones, only faint cyan-green accents, no vibrant colors, no bright neon, atmosphere oppressive melancholic existential, spectacular volumetric edge lighting in muted purple with soft rim light and subtle cyan highlights, very deep volumetric shadows, sharp precise linework in Oshii's direction, masterpiece quality, pure 90s OVA aesthetic, hyper detailed, cinematic composition, no chibi, no flat shading, no cartoonish gloss, no generic anime exaggeration. speaking japanese:「ネットに潜れば、真実が見える。でも見えすぎると、もう戻れない。私はとっくに戻る場所をなくした。」   Add subtitles in english.",
+      "retweet_count": 641,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038913025621766592",
+      "author": "elonmusk",
+      "date": "2026-03-31T09:35:21+00:00",
+      "url": "https://x.com/elonmusk/status/2038913025621766592",
+      "content_text": "RT @ElonClipsX: Elon Musk: It’s remarkable how much people stick with their ideological tribe, no matter the evidence.\n\n“It is remarkable how much people believe things simply because it is the belief of their in-group, you know, whatever their sort of political or ideological tribe is. \n\nThere's some pretty hilarious videos of some guy going around as a racist Nazi or whatever, and he was trying to show them the videos of the thing that they are talking about where he is in fact condemning the Nazis in the strongest possible terms and condemning racism in the strongest possible terms. And they literally don't even want to watch the videos. \n\nPeople, or at least some people, will stick to whatever their ideological views are, whatever that sort of political tribal views are, no matter what. The evidence could be staring them in the face and they're just going to be a flat earther. There is no evidence that you could show to a flat earther to convince them the world's round because everything is just a lie, the world is flat.”\n\nFrom: All-In Podcast November 12, 2025",
+      "retweet_count": 1246,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038911782207807740",
+      "author": "elonmusk",
+      "date": "2026-03-31T09:30:24+00:00",
+      "url": "https://x.com/elonmusk/status/2038911782207807740",
+      "content_text": "RT @LaceyPresley: Hi yeah I have a question @elonmusk what did you do to Grok Imagine??!! The Detail!! What is going on!! ❤️\n\nLook at this!! Its amazing Geek mode unlocked Thank You!! https://t.co/nKKbn20xyp",
+      "retweet_count": 656,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038908411816153587",
+      "author": "elonmusk",
+      "date": "2026-03-31T09:17:01+00:00",
+      "url": "https://x.com/elonmusk/status/2038908411816153587",
+      "content_text": "Stainless Steel Starship",
+      "retweet_count": 7692,
+      "like_count": 71326
+    },
+    {
+      "post_id": "2039156796376445033",
+      "author": "DrSteveWBrown",
+      "date": "2026-04-01T01:44:00+00:00",
+      "url": "https://x.com/DrSteveWBrown/status/2039156796376445033",
+      "content_text": "The Key Life Podcast Network is all the best podcasts on Grace in one convenient place! Now Playing: This is The Show! Discussing culture, life, and God. https://t.co/NkedSZ7EXl",
+      "retweet_count": 0,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039111920427426176",
+      "author": "DrSteveWBrown",
+      "date": "2026-03-31T22:45:41+00:00",
+      "url": "https://x.com/DrSteveWBrown/status/2039111920427426176",
+      "content_text": "“How can we possibly believe in the actual resurrection of Christ? How do we know it even happened at all? The implications, either way, are earth shattering.” -Steve Brown https://t.co/0BqM66pfoW",
+      "retweet_count": 0,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039090867315617979",
+      "author": "DrSteveWBrown",
+      "date": "2026-03-31T21:22:01+00:00",
+      "url": "https://x.com/DrSteveWBrown/status/2039090867315617979",
+      "content_text": "Did Jesus really die on a cross? Let’s talk about it on Key Life https://t.co/BPR9k2xnWb https://t.co/mmheKtWqJr",
+      "retweet_count": 0,
+      "like_count": 0
+    },
+    {
+      "post_id": "2039041799029682624",
+      "author": "DrSteveWBrown",
+      "date": "2026-03-31T18:07:03+00:00",
+      "url": "https://x.com/DrSteveWBrown/status/2039041799029682624",
+      "content_text": "“Easter is almost here, again and I’m really not ready for it. Which raises the question: how does a Christian get ready for Easter?” @Pete_Alwinson https://t.co/6oWkJtiOh0",
+      "retweet_count": 0,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038963272204849195",
+      "author": "DrSteveWBrown",
+      "date": "2026-03-31T12:55:00+00:00",
+      "url": "https://x.com/DrSteveWBrown/status/2038963272204849195",
+      "content_text": "“Easter is almost here, again and I’m really not ready for it. Which raises the question: how does a Christian get ready for Easter?” @Pete_Alwinson  https://t.co/6oWkJtiOh0",
+      "retweet_count": 0,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038728728528732254",
+      "author": "DrSteveWBrown",
+      "date": "2026-03-30T21:23:01+00:00",
+      "url": "https://x.com/DrSteveWBrown/status/2038728728528732254",
+      "content_text": "He’s written 23 books, but NEVER one like this. This week, Steve and the gang chat with best-selling author @PatrickMorley about ‘evidence beyond a reasonable doubt’ that God is who He says He is. https://t.co/7fVTRlLij5",
+      "retweet_count": 0,
+      "like_count": 1
+    },
+    {
+      "post_id": "2038698527497281839",
+      "author": "DrSteveWBrown",
+      "date": "2026-03-30T19:23:00+00:00",
+      "url": "https://x.com/DrSteveWBrown/status/2038698527497281839",
+      "content_text": "He’s written 23 books, but NEVER one like this. This week, Steve and the gang chat with best-selling author @PatrickMorley about ‘evidence beyond a reasonable doubt’ that God is who He says He is: https://t.co/7fVTRlLij5",
+      "retweet_count": 0,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038623539624923155",
+      "author": "DrSteveWBrown",
+      "date": "2026-03-30T14:25:02+00:00",
+      "url": "https://x.com/DrSteveWBrown/status/2038623539624923155",
+      "content_text": "It really happened and it changed everything. Let’s talk on Key Life. https://t.co/jk5K5qjjof https://t.co/xU5IzQzTP7",
+      "retweet_count": 0,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038484813666259315",
+      "author": "Gradio",
+      "date": "2026-03-30T05:13:47+00:00",
+      "url": "https://x.com/Gradio/status/2038484813666259315",
+      "content_text": "RT @broadfield_dev: @Teknium @huggingface example: \nwebsearch / webscrape using @gradio with easy API and MCP endpoints\n\nduplicate this space to make it your own\nhttps://t.co/4MORPeUkiH",
+      "retweet_count": 1,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038483346003730561",
+      "author": "Gradio",
+      "date": "2026-03-30T05:07:57+00:00",
+      "url": "https://x.com/Gradio/status/2038483346003730561",
+      "content_text": "RT @FuwaCocoOwnerKG: > Gradio CLI には、predet と info コマンドが利用可能になりました。任意のGradio Spaceは、ターミナルのワンライナーから呼び出すことができるようになりました。\n\nこれは重要です。なぜなら、コーディングエージェント（Claude Code、Cursor、Codex）は、Pythonスクリプトを先に書かずに、Hugging Face上の400k以上のGradio Spacesを任意に呼び出できるようになったからです 🤯",
+      "retweet_count": 3,
+      "like_count": 0
+    },
+    {
+      "post_id": "2038628467965649282",
+      "author": "SCSatCMU",
+      "date": "2026-03-30T14:44:37+00:00",
+      "url": "https://x.com/SCSatCMU/status/2038628467965649282",
+      "content_text": "“How quickly can you discover all the failure cases and fix them?” Schneider asked. “That governs how quickly you can scale up.\"\n\n@CMU_Robotics faculty member Jeff Schneider talks to @YahooNews about what's next for HAVs in Pennsylvania.\n\nhttps://t.co/L4TmClM9jQ",
+      "retweet_count": 1,
+      "like_count": 2
+    }
+  ]
+}

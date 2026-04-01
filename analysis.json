@@ -1,0 +1,52 @@
+{
+  "LLM": {
+    "0": [
+      [
+        "“Christian faith and Easter preparation through evidential belief in God and the resurrection”: This topic centers on how Christians can authentically prepare for Easter by grappling with rational evidence—particularly “beyond a reasonable doubt”—for God’s identity and the historical reality of Christ’s resurrection, as explored in conversations with authors like Patrick Morley and reflected in questions raised by figures like Pete Alwinson and Steve Brown.",
+        1
+      ]
+    ],
+    "1": [
+      [
+        "“human hand motion generation and robotic manipulation”: HandX advances human motion generation by focusing on high-fidelity bimanual hand motion with scalable data and models, enabling versatile, real-world deployment on humanoid robots, while connecting to foundational mathematical robotics, image editing benchmarks, and interdisciplinary research in marine and AI-driven manipulation.",
+        1
+      ]
+    ],
+    "2": [
+      [
+        "“International condemnation of attacks on UN peacekeepers and opposition to the death penalty”: Spain and other international actors strongly condemn recent deadly attacks against UNIFIL peacekeepers in Lebanon, demand accountability and cessation of hostilities by Israel, express condolences to victims’ families, and jointly oppose the death penalty as inhumane and ineffective, while also highlighting related concerns such as journalist abductions and AI governance in Africa.",
+        1
+      ]
+    ],
+    "3": [
+      [
+        "“Externalized resource costs in software development”: Software bloat—especially in RAM and digital footprint—is driven by economic misalignment where companies optimize only for costs they directly bear (like cloud inference) while externalizing others (like user hardware memory, electricity, and performance degradation) onto end users.",
+        1
+      ]
+    ],
+    "4": [
+      [
+        "“Software supply chain security and AI research integrity”: A critical examination of npm dependency vulnerabilities, HF data leaks, and the challenges of credit assignment, harness optimization, and responsible defaults in large-scale AI development and package management.",
+        1
+      ]
+    ],
+    "5": [
+      [
+        "“Democratic AI governance and interdisciplinary brain research”: Citizens’ assemblies and global academic collaborations are advancing democratic, human-centered AI policy and generating new biological insights through large-scale, cross-institutional research on brain development and disease.",
+        1
+      ]
+    ],
+    "6": [
+      [
+        "AI research and education community engagement through conferences, lectures, panels, and interdisciplinary collaboration in NLP, speech, language, and learning.",
+        1
+      ]
+    ],
+    "7": [
+      [
+        "“Local AI and the llama.cpp ecosystem”: The llama.cpp project represents a pivotal open, community-driven effort to build efficient, cross-platform software infrastructure enabling practical, resource-conscious local LLMs and agentic workflows—proving that human-comprehensible, useful AI intelligence is increasingly attainable on everyday devices without reliance on cloud or frontier-scale systems.",
+        1
+      ]
+    ]
+  }
+}

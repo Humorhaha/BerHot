@@ -1,0 +1,12 @@
+{
+  "run_at": "2026-04-01T16:15:43.987505",
+  "n_docs": 64,
+  "cluster_backend": "kmeans",
+  "llm_enabled": true,
+  "embedding_model": "all-MiniLM-L6-v2",
+  "n_clusters": 8,
+  "min_cluster_size": null,
+  "umap_n_neighbors": 5,
+  "umap_min_dist": 0.0,
+  "random_state": 0
+}
