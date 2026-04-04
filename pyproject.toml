@@ -29,6 +29,14 @@ viz = [
 zhihu = [
     "playwright>=1.40.0",
 ]
+mindspider = [
+    # SQLAlchemy + DB 驱动（按实际数据库类型二选一）
+    "sqlalchemy>=2.0.0",
+    "pymysql>=1.1.0",          # MySQL / MariaDB
+    # "psycopg2-binary>=2.9.0",  # 取消注释以支持 PostgreSQL
+    # MindSpider / MediaCrawler 自身依赖（若通过子进程调用，则无需安装到本 venv）
+    "playwright>=1.40.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
