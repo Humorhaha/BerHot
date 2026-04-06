@@ -24,6 +24,32 @@ uv add playwright
 playwright install chromium
 ```
 
+### 2. 配置 Firecrawl（推荐生产环境）
+
+```bash
+export FIRECRAWL_API_KEY=fc-your-key
+export ZHIHU_PROVIDER=firecrawl
+
+# 可选调优
+export ZHIHU_MAX_SCROLL_ROUNDS=12
+export ZHIHU_DISCOVERY_IDLE_ROUNDS=2
+export ZHIHU_CRAWL_TIMEOUT_S=180
+export ZHIHU_DEBUG_ARTIFACTS=0
+export ZHIHU_FIRECRAWL_ZERO_DATA_RETENTION=1
+```
+
+使用方式：
+
+```bash
+cd crawl/zhihu_crawler
+
+# 显式指定 Firecrawl provider
+python run.py question --provider firecrawl --ids "19551997"
+
+# 或通过环境变量切换默认 provider
+python run.py question --ids "19551997"
+```
+
 ### 2. 选择爬取方式
 
 #### 方式 A: 免登录（推荐简单场景）
@@ -71,6 +97,12 @@ python run.py user --tokens "excited-vczh"
 # 自动登录并爬取
 python run.py question --ids "19551997" --auto-login
 
+# ========== Firecrawl（推荐生产环境） ==========
+
+python run.py question --provider firecrawl --ids "19551997"
+python run.py question --provider firecrawl --file config/questions.yaml
+python run.py question --provider firecrawl --ids "19551997" --max 100
+
 # 直接使用 scrapy 命令
 scrapy crawl zhihu_question -a question_ids="19551997"
 scrapy crawl zhihu_question_html -a question_ids="19551997"  # 免登录版
@@ -94,9 +126,25 @@ python pipeline.py \
 
 | 模式 | 登录要求 | 数据量 | 速度 | 稳定性 | 使用场景 |
 |------|---------|--------|------|--------|----------|
+| **Firecrawl** | 不需要知乎 Cookie | 高覆盖率 | 中 | 高 | 生产环境问题抓取 |
 | **API 模式** | 需要 Cookie | 完整（无限制） | 快 | 中 | 大规模爬取 |
 | **HTML 免登录** | 不需要 | 有限（前 20-50 条） | 慢 | 中 | 简单场景 |
 | **搜索免登录** | 不需要 | 有限 | 中 | 低 | 关键词探索 |
+
+## Firecrawl 模式说明
+
+Firecrawl provider 目前只覆盖“按问题抓取回答”。
+
+特点：
+- 不在生产环境持有知乎登录 Cookie
+- 先通过远程浏览器发现 answer URL，再批量抓取 answer 页面
+- 输出格式与现有 `data/zhihu_texts.json` / `data/snapshots/zhihu_*.json` 完全兼容
+- 额外输出 `data/manifests/zhihu_firecrawl_*.json` 记录覆盖率、失败数和 partial 状态
+
+限制：
+- 当前不覆盖 topic/user/search 的 Firecrawl 迁移
+- “尽量全量”依赖页面滚动与展开效果，不承诺等价知乎 API 的绝对全量
+- 若开启 `ZHIHU_DEBUG_ARTIFACTS=1`，失败问题会额外保存调试产物到 `data/debug/<question_id>/`
 
 ## 免登录方案详解
 

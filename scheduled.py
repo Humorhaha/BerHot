@@ -32,6 +32,9 @@
 
   # 7. 仅从 MindSpider 数据库读取（MindSpider 已运行过）
   uv run python scheduled.py mindspider --platforms xhs wb --date 2026-04-04
+
+  # 8. 抓取知乎问题（Firecrawl）
+  uv run python scheduled.py zhihu-crawl --from-yaml --max-answers 20
 """
 
 from __future__ import annotations
@@ -49,9 +52,11 @@ from loguru import logger
 
 PROJECT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_DIR))
+ZHIHU_CRAWLER_DIR = PROJECT_DIR / "crawl" / "zhihu_crawler"
+sys.path.insert(0, str(ZHIHU_CRAWLER_DIR))
 
 from twitter_crawler import (
-    build_payload,
+    build_payload as build_twitter_payload,
     fetch_multiple_users,
     save_json,
 )
@@ -59,11 +64,14 @@ from pipeline import run_pipeline
 from pipeline_config import parse_config
 from utils.user_utils import _extract_username, load_usernames_from_yaml
 from utils.preprocess import second_pass
+from zhihu.exporter import build_payload as build_zhihu_payload
+from zhihu.providers.firecrawl import FirecrawlConfig, ZhihuFirecrawlCrawler, load_question_targets
 
 load_dotenv(dotenv_path=PROJECT_DIR / ".env")
 
 SNAPSHOT_DIR = PROJECT_DIR / "data" / "snapshots"
 USERS_YAML   = PROJECT_DIR / "users.yaml"
+ZHIHU_QUESTIONS_YAML = PROJECT_DIR / "crawl" / "zhihu_crawler" / "config" / "questions.yaml"
 
 
 # ─── MindSpider 数据库连接字符串 ──────────────────────────────────────────────
@@ -115,7 +123,7 @@ def cmd_crawl(
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     snapshot_path = SNAPSHOT_DIR / f"twitter_{ts}.json"
-    payload = build_payload(tweets, usernames)
+    payload = build_twitter_payload(tweets, usernames)
     save_json(payload, snapshot_path)
 
     return snapshot_path
@@ -187,18 +195,20 @@ def cmd_crawl_mindspider(
 def _load_snapshots(
     window: int,
     max_age_days: int | None = None,
+    prefix: str = "twitter",
 ) -> tuple[list[str], list[dict]]:
     """
     读取最近 `window` 个快照（所有信源：twitter_*.json、mindspider_*.json 等），
     合并去重，返回 (docs, tweets)。
     docs 优先使用 translated_text，其次 clean_text，再次 content_text。
     """
-    snapshots = sorted(SNAPSHOT_DIR.glob("*.json"), reverse=True)[:window]
+    pattern = "*.json" if prefix == "*" else f"{prefix}_*.json"
+    snapshots = sorted(SNAPSHOT_DIR.glob(pattern), reverse=True)[:window]
     if not snapshots:
         raise FileNotFoundError(f"no snapshots in {SNAPSHOT_DIR}")
 
-    logger.info(f"merging {len(snapshots)} snapshots")
-    all_tweets: list[dict] = []
+    logger.info(f"merging {len(snapshots)} {prefix} snapshots")
+    all_items: list[dict] = []
     seen_ids: set[str] = set()
 
     cutoff: datetime | None = None
@@ -215,7 +225,11 @@ def _load_snapshots(
             # 多信源去重：用 "信源:post_id" 作为唯一键，避免不同平台 ID 碰撞
             source_key = item.get("source_platform") or site
             pid = f"{source_key}:{item.get('post_id', '')}"
-            text = item.get("clean_text") or item.get("content_text", "").strip()
+            text = (
+                item.get("translated_text")
+                or item.get("clean_text")
+                or item.get("content_text", "").strip()
+            )
             if not text or pid in seen_ids:
                 continue
             if cutoff:
@@ -224,28 +238,28 @@ def _load_snapshots(
                         continue
                 except (ValueError, TypeError):
                     pass
-            all_tweets.append(item)
+            all_items.append(item)
             seen_ids.add(pid)
 
-    all_tweets.sort(
+    all_items.sort(
         key=lambda x: datetime.fromisoformat(x.get("date", "1970-01-01")),
         reverse=True,
     )
 
-    # 下游模型优先用 translated_text（非英文已翻译），其次 clean_text，再次 content_text
     all_docs = [
-        t.get("translated_text") or t.get("clean_text") or t.get("content_text", "")
-        for t in all_tweets
+        item.get("translated_text") or item.get("clean_text") or item.get("content_text", "")
+        for item in all_items
     ]
 
-    if all_tweets:
-        newest = all_tweets[0]["date"][:10]
-        oldest = all_tweets[-1]["date"][:10]
-        logger.info(f"merged {len(all_docs)} unique docs ({oldest} ~ {newest})")
+    if all_items:
+        newest = all_items[0]["date"][:10]
+        oldest = all_items[-1]["date"][:10]
+        logger.info(f"merged {len(all_docs)} unique {prefix} docs ({oldest} ~ {newest})")
     else:
-        logger.info("merged 0 docs")
+        logger.info(f"merged 0 {prefix} docs")
 
-    return all_docs, all_tweets
+
+    return all_docs, all_items
 
 
 def cmd_analyze(
@@ -254,7 +268,7 @@ def cmd_analyze(
     pipeline_argv: list[str] | None = None,
 ) -> None:
     """合并最近 window 个快照，运行 BERTopic 全量分析。"""
-    docs, tweets = _load_snapshots(window, max_age_days)
+    docs, tweets = _load_snapshots(window, max_age_days, prefix="twitter")
     if not docs:
         logger.warning("no docs available, abort analysis")
         return
@@ -266,7 +280,7 @@ def cmd_analyze(
     for t in tweets:
         t["content_text"] = t.get("translated_text") or t.get("clean_text") or t.get("content_text", "")
 
-    payload = build_payload(tweets, [])
+    payload = build_twitter_payload(tweets, [])
     save_json(payload, merged_json)
 
     argv = ["--input-json", str(merged_json)] + (pipeline_argv or [])
@@ -278,6 +292,54 @@ def cmd_analyze(
     from pipeline_io import load_docs as _load_docs_for_stats
     analyzed_docs = _load_docs_for_stats(config.input_json)
     logger.info(f"pipeline done | docs={len(analyzed_docs)} → {config.output_dir}")
+
+
+def cmd_zhihu_crawl(
+    questions: list[str],
+    max_answers: int | None = None,
+) -> Path:
+    """
+    使用 Firecrawl 抓取知乎问题并写入根目录 data 快照。
+    返回写入的快照路径。
+    """
+    config = FirecrawlConfig.from_env(output_dir=PROJECT_DIR / "data", max_answers=max_answers)
+    crawler = ZhihuFirecrawlCrawler(config)
+    payload = crawler.crawl_questions(questions, max_answers=max_answers)
+    if payload["total_count"] == 0:
+        logger.warning("no zhihu answers fetched, skip snapshot")
+        return Path()
+    snapshot_path = crawler.last_export_paths.get("snapshot", Path())
+    logger.info(f"zhihu crawl done | answers={payload['total_count']} snapshot={snapshot_path}")
+    return snapshot_path
+
+
+def cmd_zhihu_analyze(
+    window: int = 5,
+    max_age_days: int | None = None,
+    pipeline_argv: list[str] | None = None,
+) -> None:
+    """合并最近 window 个知乎快照，运行 BERTopic 全量分析。"""
+    docs, items = _load_snapshots(window, max_age_days, prefix="zhihu")
+    if not docs:
+        logger.warning("no zhihu docs available, abort analysis")
+        return
+
+    merged_json = PROJECT_DIR / "data" / "zhihu_texts.json"
+    for item in items:
+        item["content_text"] = item.get("translated_text") or item.get("clean_text") or item.get("content_text", "")
+
+    payload = build_zhihu_payload(items, "scheduled.zhihu")
+    save_json(payload, merged_json)
+
+    argv = ["--input-json", str(merged_json)] + (pipeline_argv or [])
+    config = parse_config(argv=argv)
+
+    logger.info("BERTopic pipeline start (zhihu)")
+    run_pipeline(config, quiet=True)
+
+    from pipeline_io import load_docs as _load_docs_for_stats
+    analyzed_docs = _load_docs_for_stats(config.input_json)
+    logger.info(f"zhihu pipeline done | docs={len(analyzed_docs)} → {config.output_dir}")
 
 
 # ─── CLI ─────────────────────────────────────────────────────────────────────
@@ -303,6 +365,8 @@ def main() -> None:
     p_analyze.add_argument("--window", type=int, default=5)
     p_analyze.add_argument("--max-age-days", type=int, metavar="D")
     p_analyze.add_argument("--pipeline-args", nargs=argparse.REMAINDER, default=[])
+    p_analyze.add_argument("--api-key", default=os.getenv("TWTAPI_KEY"))
+
 
     # --- mindspider ---
     p_ms = subparsers.add_parser(
@@ -349,6 +413,29 @@ def main() -> None:
     p_all.add_argument("--window", type=int, default=5)
     p_all.add_argument("--pipeline-args", nargs=argparse.REMAINDER, default=[])
 
+    # --- zhihu-crawl ---
+    p_zhihu_crawl = subparsers.add_parser("zhihu-crawl", help="抓取知乎问题，写时间戳快照")
+    p_zhihu_crawl.add_argument("--question-ids", nargs="+")
+    p_zhihu_crawl.add_argument("--questions-file")
+    p_zhihu_crawl.add_argument("--from-yaml", action="store_true")
+    p_zhihu_crawl.add_argument("--max-answers", type=int)
+
+    # --- zhihu-analyze ---
+    p_zhihu_analyze = subparsers.add_parser("zhihu-analyze", help="合并知乎快照并运行 pipeline")
+    p_zhihu_analyze.add_argument("--window", type=int, default=5)
+    p_zhihu_analyze.add_argument("--max-age-days", type=int, metavar="D")
+    p_zhihu_analyze.add_argument("--pipeline-args", nargs=argparse.REMAINDER, default=[])
+
+    # --- zhihu-all ---
+    p_zhihu_all = subparsers.add_parser("zhihu-all", help="抓取知乎 + 分析（一次性完成）")
+    p_zhihu_all.add_argument("--question-ids", nargs="+")
+    p_zhihu_all.add_argument("--questions-file")
+    p_zhihu_all.add_argument("--from-yaml", action="store_true")
+    p_zhihu_all.add_argument("--max-answers", type=int)
+    p_zhihu_all.add_argument("--max-age-days", type=int, metavar="D")
+    p_zhihu_all.add_argument("--window", type=int, default=5)
+    p_zhihu_all.add_argument("--pipeline-args", nargs=argparse.REMAINDER, default=[])
+
     args = parser.parse_args()
 
     def resolve_usernames(cmd_args) -> list[str]:
@@ -363,6 +450,17 @@ def main() -> None:
             return [u for u in (_extract_username(u) for u in cmd_args.usernames) if u]
         else:
             parser.error("请指定 --usernames、--from-yaml 或 --sample N")
+
+    def resolve_questions(cmd_args) -> list[str]:
+        questions_file = getattr(cmd_args, "questions_file", None)
+        if getattr(cmd_args, "from_yaml", False):
+            questions_file = str(ZHIHU_QUESTIONS_YAML)
+
+        if getattr(cmd_args, "question_ids", None):
+            return [qid for qid in cmd_args.question_ids if qid]
+        if questions_file:
+            return load_question_targets(questions_file=questions_file)
+        parser.error("请指定 --question-ids、--questions-file 或 --from-yaml")
 
     if args.cmd == "crawl":
         if not args.api_key:
@@ -399,6 +497,26 @@ def main() -> None:
         usernames = resolve_usernames(args)
         cmd_crawl(usernames, args.api_key, args.max_tweets, args.translate)
         cmd_analyze(
+            window=args.window,
+            max_age_days=args.max_age_days,
+            pipeline_argv=getattr(args, "pipeline_args", []),
+        )
+
+    elif args.cmd == "zhihu-crawl":
+        questions = resolve_questions(args)
+        cmd_zhihu_crawl(questions, args.max_answers)
+
+    elif args.cmd == "zhihu-analyze":
+        cmd_zhihu_analyze(
+            window=args.window,
+            max_age_days=args.max_age_days,
+            pipeline_argv=args.pipeline_args,
+        )
+
+    elif args.cmd == "zhihu-all":
+        questions = resolve_questions(args)
+        cmd_zhihu_crawl(questions, args.max_answers)
+        cmd_zhihu_analyze(
             window=args.window,
             max_age_days=args.max_age_days,
             pipeline_argv=getattr(args, "pipeline_args", []),

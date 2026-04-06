@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -8,6 +9,8 @@ from typing import Any
 from bertopic import BERTopic
 
 from pipeline_config import PipelineConfig
+
+CJK_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 
 
 def _generate_wordcloud(topic_model: BERTopic, output_dir: Path) -> None:
@@ -46,7 +49,17 @@ def _generate_wordcloud(topic_model: BERTopic, output_dir: Path) -> None:
         pass  # wordcloud 未安装则跳过
 
 
-def load_docs(input_json: Path, min_words: int = 8) -> list[str]:
+def is_meaningful_doc(text: str, min_words: int = 8, min_cjk_chars: int = 20) -> bool:
+    """CJK 感知的最小文档长度判断。"""
+    stripped = text.strip()
+    if not stripped:
+        return False
+    if len(stripped.split()) >= min_words:
+        return True
+    return len(CJK_RE.findall(stripped)) >= min_cjk_chars
+
+
+def load_docs(input_json: Path, min_words: int = 8, min_cjk_chars: int = 20) -> list[str]:
     """
     加载并过滤文档。
 
@@ -69,7 +82,7 @@ def load_docs(input_json: Path, min_words: int = 8) -> list[str]:
         if isinstance(value, str):
             text = value.strip()
             if text:
-                if len(text.split()) >= min_words:
+                if is_meaningful_doc(text, min_words=min_words, min_cjk_chars=min_cjk_chars):
                     docs.append(text)
                 else:
                     skipped += 1
@@ -77,7 +90,10 @@ def load_docs(input_json: Path, min_words: int = 8) -> list[str]:
     if not docs:
         raise ValueError(f"No valid `content_text` records found in {input_json}")
     if skipped:
-        print(f"  [load_docs] 过滤了 {skipped} 条极短文本 (<{min_words} 词)，保留 {len(docs)} 条")
+        print(
+            f"  [load_docs] 过滤了 {skipped} 条极短文本 "
+            f"(英文 <{min_words} 词 / 中文 <{min_cjk_chars} 字)，保留 {len(docs)} 条"
+        )
     return docs
 
 

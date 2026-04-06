@@ -2,11 +2,15 @@
 # 从 URL 提取：zhihu.com/people/[这个字符串]
 # 格式：纯列表 或 { users: [...] }
 
-# 知名技术答主
+# 通用技术答主
 - excited-vczh         # 轮子哥（vczh）
 - kaiyuan-zhongwen     # 开源中文
 - mileijun             # 雷军
 
-# 示例（请替换为实际要爬取的用户）
-# - example-user-1
-# - example-user-2
+# AI / 科技高质量信源
+- YJango               # 机器学习 / 深度学习
+- zhou-bo-lei          # 计算机视觉
+- zhang-jun-lin-76     # NLP / 搜索 / 推荐系统
+- naiyan-wang          # 计算机视觉 / AI 工程
+- mileistone           # 深度学习 / 计算机视觉
+- wang-zhe-58          # 推荐系统 / 广告算法

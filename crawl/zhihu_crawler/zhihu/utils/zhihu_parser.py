@@ -158,6 +158,39 @@ def extract_question_id_from_url(url: str) -> str | None:
     return None
 
 
+def normalize_question_identifier(value: str) -> str | None:
+    """
+    标准化问题标识。
+
+    支持：
+    - 纯 question id
+    - question URL
+    - question/answer URL
+    """
+    if not value:
+        return None
+
+    text = str(value).strip()
+    if not text:
+        return None
+
+    if text.isdigit():
+        return text
+
+    return extract_question_id_from_url(text)
+
+
+def extract_answer_id_from_url(url: str) -> str | None:
+    """从知乎回答 URL 中提取 answer id。"""
+    if not url:
+        return None
+
+    match = re.search(r"/answer/(\d+)", url)
+    if match:
+        return match.group(1)
+    return None
+
+
 def extract_topic_id_from_url(url: str) -> str | None:
     """
     从知乎话题 URL 中提取话题 ID

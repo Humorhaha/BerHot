@@ -6,7 +6,6 @@
 - BERTopic 格式导出
 """
 
-import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,6 +19,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from utils.text_clean import extract_urls, remove_emoji
 
+from zhihu.exporter import build_payload, export_payload
 from zhihu.items import ZhihuAnswerItem, ZhihuArticleItem
 from zhihu.utils.text_clean_zhihu import html_to_text
 
@@ -101,51 +101,7 @@ class BERTopicExportPipeline:
             output_dir = Path(s.settings.get("OUTPUT_DIR", "data"))
         else:
             output_dir = Path("data")
-        output_dir.mkdir(parents=True, exist_ok=True)
         
-        # 生成时间戳
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-        
-        # 保存快照（带时间戳的历史版本）
-        snapshot_path = output_dir / "snapshots" / f"zhihu_{timestamp}.json"
-        snapshot_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        # 构建输出数据
-        payload = {
-            "site": "知乎 / Zhihu",
-            "source": s.name if s else "unknown",
-            "fetched_at_utc": datetime.now(timezone.utc).isoformat(),
-            "total_count": len(self.items),
-            "texts": self.items,
-        }
-        
-        # 保存快照
-        with open(snapshot_path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=2)
-        
-        if s:
-            s.logger.info(f"Saved snapshot: {len(self.items)} items → {snapshot_path}")
-        
-        # 同时写入主数据文件（供 pipeline.py 直接读取）
-        main_path = output_dir / "zhihu_texts.json"
-        with open(main_path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=2)
-        
-        if s:
-            s.logger.info(f"Saved main data: {len(self.items)} items → {main_path}")
-        
-        # 同时写入 CSV 格式（方便查看）
-        try:
-            import csv
-            csv_path = output_dir / f"zhihu_{timestamp}.csv"
-            if self.items:
-                headers = self.items[0].keys()
-                with open(csv_path, "w", encoding="utf-8", newline="") as f:
-                    writer = csv.DictWriter(f, fieldnames=headers)
-                    writer.writeheader()
-                    writer.writerows(self.items)
-                if s:
-                    s.logger.info(f"Saved CSV: {len(self.items)} items → {csv_path}")
-        except Exception as e:
-            if s:
-                s.logger.warning(f"Failed to save CSV: {e}")
+        payload = build_payload(self.items, s.name if s else "unknown")
+        export_payload(payload, output_dir, timestamp=timestamp, logger=s.logger if s else None)

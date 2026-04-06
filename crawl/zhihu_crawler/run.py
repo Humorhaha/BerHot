@@ -15,9 +15,12 @@
 """
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
+
+from zhihu.providers.firecrawl import FirecrawlConfig, ZhihuFirecrawlCrawler, load_question_targets
 
 
 def get_cookie_from_auth() -> str:
@@ -60,6 +63,29 @@ def add_common_args(parser):
     )
 
 
+def resolve_cookie(args) -> str | None:
+    """解析 Cookie，仅供 API provider / topic / user 使用。"""
+    if getattr(args, "cookies", None):
+        print("使用命令行提供的 Cookie")
+        return args.cookies
+
+    if getattr(args, "auto_login", False):
+        cookie = get_cookie_from_auth()
+        print("使用自动登录获取的 Cookie")
+        return cookie
+
+    try:
+        from zhihu.utils.auth import load_cookies, cookies_to_string
+        saved_cookies = load_cookies("cookies.json")
+        if saved_cookies:
+            print("使用已保存的 Cookie (cookies.json)")
+            return cookies_to_string(saved_cookies)
+    except Exception:
+        pass
+
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="知乎爬虫启动脚本",
@@ -100,6 +126,11 @@ def main():
     q_parser.add_argument("--file", help="YAML 配置文件路径")
     q_parser.add_argument("--max", type=int, dest="max_answers", help="每个问题最多爬取的回答数")
     q_parser.add_argument(
+        "--provider",
+        choices=["api", "html", "firecrawl"],
+        help="question 采集 provider（默认读取 ZHIHU_PROVIDER，未设置时为 api）",
+    )
+    q_parser.add_argument(
         "--no-login",
         action="store_true",
         help="使用免登录 HTML 爬虫（限制：只能获取前 20-50 个回答）",
@@ -138,30 +169,34 @@ def main():
         parser.print_help()
         sys.exit(1)
     
-    # 处理 Cookie
-    cookie = None
-    if args.cookies:
-        cookie = args.cookies
-        print("使用命令行提供的 Cookie")
-    elif args.auto_login:
-        cookie = get_cookie_from_auth()
-        print("使用自动登录获取的 Cookie")
-    else:
-        # 尝试从 cookies.json 加载
-        try:
-            from zhihu.utils.auth import load_cookies, cookies_to_string
-            saved_cookies = load_cookies("cookies.json")
-            if saved_cookies:
-                cookie = cookies_to_string(saved_cookies)
-                print("使用已保存的 Cookie (cookies.json)")
-        except:
-            pass
-    
     spider_args = []
+    cookie = None
     
     if args.command == "question":
-        # 判断是否使用免登录模式
-        if args.no_login:
+        provider = args.provider or ("html" if args.no_login else os.getenv("ZHIHU_PROVIDER", "api").strip() or "api")
+
+        if provider == "firecrawl":
+            if args.auto_login or args.cookies:
+                print("提示: Firecrawl provider 不使用知乎登录 Cookie，已忽略 --auto-login/--cookies")
+
+            targets = load_question_targets(question_ids=args.ids, questions_file=args.file)
+            if not targets:
+                print("Error: 请提供 --ids 或 --file 参数")
+                sys.exit(1)
+
+            try:
+                config = FirecrawlConfig.from_env(output_dir=Path("data"), max_answers=args.max_answers)
+            except ValueError as e:
+                print(f"Error: {e}")
+                sys.exit(1)
+
+            crawler = ZhihuFirecrawlCrawler(config)
+            payload = crawler.crawl_questions(targets, max_answers=args.max_answers)
+            print(f"Firecrawl 抓取完成，共导出 {payload['total_count']} 条回答")
+            if crawler.last_manifest_path:
+                print(f"Manifest: {crawler.last_manifest_path}")
+
+        elif provider == "html":
             print("使用免登录模式（HTML 爬虫）")
             print("注意：每个问题只能获取前 20-50 个回答")
             if args.ids:
@@ -177,11 +212,12 @@ def main():
             
             run_spider("zhihu_question_html", spider_args, None)  # 免登录不需要 cookie
         else:
-            # 普通模式需要 Cookie
+            cookie = resolve_cookie(args)
+
             if not cookie:
                 print("警告: 未提供 Cookie，知乎 API 可能返回 403")
                 print("建议: 使用 --auto-login 或 --cookies 提供 Cookie")
-                print("      或使用 --no-login 启用免登录模式（有限制）")
+                print("      或使用 --provider firecrawl / --no-login")
             
             if args.ids:
                 spider_args.extend(["-a", f"question_ids={args.ids}"])
@@ -204,6 +240,7 @@ def main():
         run_spider("zhihu_search", spider_args, None)
     
     elif args.command == "topic":
+        cookie = resolve_cookie(args)
         if not cookie:
             print("警告: 未提供 Cookie，知乎 API 可能返回 403")
             print("建议: 使用 --auto-login 或 --cookies 提供 Cookie")
@@ -222,6 +259,7 @@ def main():
         run_spider("zhihu_topic", spider_args, cookie)
     
     elif args.command == "user":
+        cookie = resolve_cookie(args)
         if not cookie:
             print("警告: 未提供 Cookie，知乎 API 可能返回 403")
             print("建议: 使用 --auto-login 或 --cookies 提供 Cookie")
