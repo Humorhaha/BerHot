@@ -32,18 +32,36 @@
 
   # 7. 仅从 MindSpider 数据库读取（MindSpider 已运行过）
   uv run python scheduled.py mindspider --platforms xhs wb --date 2026-04-04
+
+定时调度（cron）：
+
+  # 查看会安装的 crontab 条目（dry-run）
+  uv run python scheduled.py cron-show
+
+  # 安装到系统 crontab（自动追加，不覆盖已有条目）
+  uv run python scheduled.py cron-install
+
+  # 启动长期运行的 Python 调度器守护进程（无需系统 cron）
+  uv run python scheduled.py scheduler
+
+  # 手动执行 sources.yaml 中的某个信源
+  uv run python scheduled.py run-source --id twitter_ai_researchers
 """
 
 from __future__ import annotations
 
+import heapq
 import json
 import os
 import random
+import subprocess
 import sys
+import time
 from datetime import date as date_type
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import yaml
 from dotenv import load_dotenv
 from loguru import logger
 
@@ -62,8 +80,11 @@ from utils.preprocess import second_pass
 
 load_dotenv(dotenv_path=PROJECT_DIR / ".env")
 
-SNAPSHOT_DIR = PROJECT_DIR / "data" / "snapshots"
-USERS_YAML   = PROJECT_DIR / "users.yaml"
+SNAPSHOT_DIR  = PROJECT_DIR / "data" / "snapshots"
+LOGS_DIR      = PROJECT_DIR / "logs"
+USERS_YAML    = PROJECT_DIR / "users.yaml"
+SOURCES_CONFIG = PROJECT_DIR / "crawl" / "sources.yaml"
+ZHIHU_QUESTIONS_YAML = PROJECT_DIR / "crawl" / "zhihu_crawler" / "config" / "questions.yaml"
 
 
 # ─── MindSpider 数据库连接字符串 ──────────────────────────────────────────────
@@ -182,29 +203,62 @@ def cmd_crawl_mindspider(
     return snapshot_path
 
 
+# ─── Step 1c: 知乎 Firecrawl 爬取快照 ────────────────────────────────────────
+
+def cmd_zhihu_crawl(
+    questions: list[str],
+    max_answers: int | None = None,
+) -> Path:
+    """
+    使用 Firecrawl 抓取知乎问题，写入带时间戳的快照文件。
+    返回写入的快照路径。
+    """
+    ZHIHU_CRAWLER_DIR = PROJECT_DIR / "crawl" / "zhihu_crawler"
+    sys.path.insert(0, str(ZHIHU_CRAWLER_DIR))
+    from zhihu.providers.firecrawl import FirecrawlConfig, ZhihuFirecrawlCrawler
+
+    config = FirecrawlConfig.from_env(output_dir=PROJECT_DIR / "data", max_answers=max_answers)
+    crawler = ZhihuFirecrawlCrawler(config)
+    payload = crawler.crawl_questions(questions, max_answers=max_answers)
+    if payload["total_count"] == 0:
+        logger.warning("no zhihu answers fetched, skip snapshot")
+        return Path()
+    snapshot_path = crawler.last_export_paths.get("snapshot", Path())
+    logger.info(f"zhihu crawl done | answers={payload['total_count']} snapshot={snapshot_path}")
+    return snapshot_path
+
+
 # ─── Step 2: 合并快照并分析 ──────────────────────────────────────────────────
 
 def _load_snapshots(
     window: int,
     max_age_days: int | None = None,
+    sources: str = "*",
 ) -> tuple[list[str], list[dict]]:
     """
-    读取最近 `window` 个快照（所有信源：twitter_*.json、mindspider_*.json 等），
-    合并去重，返回 (docs, tweets)。
+    读取最近 `window` 个快照，合并去重，返回 (docs, items)。
+
+    Args:
+        window:       读取最新的 N 个快照文件
+        max_age_days: 丢弃超过 N 天的记录（None = 不限制）
+        sources:      文件前缀过滤，"*" = 全部信源，"twitter" = 仅推文快照，
+                      "mindspider" = 仅 MindSpider 快照，以此类推
+
     docs 优先使用 translated_text，其次 clean_text，再次 content_text。
     """
-    snapshots = sorted(SNAPSHOT_DIR.glob("*.json"), reverse=True)[:window]
+    pattern = "*.json" if sources == "*" else f"{sources}_*.json"
+    snapshots = sorted(SNAPSHOT_DIR.glob(pattern), reverse=True)[:window]
     if not snapshots:
-        raise FileNotFoundError(f"no snapshots in {SNAPSHOT_DIR}")
+        raise FileNotFoundError(f"no snapshots matching '{pattern}' in {SNAPSHOT_DIR}")
 
-    logger.info(f"merging {len(snapshots)} snapshots")
-    all_tweets: list[dict] = []
+    logger.info(f"merging {len(snapshots)} snapshots (sources={sources!r})")
+    all_items: list[dict] = []
     seen_ids: set[str] = set()
 
     cutoff: datetime | None = None
     if max_age_days:
         cutoff = datetime.now(timezone.utc) - timedelta(days=max_age_days)
-        logger.info(f"age filter: >{max_age_days}d tweets dropped")
+        logger.info(f"age filter: >{max_age_days}d records dropped")
 
     for snap in sorted(snapshots):
         logger.info(f"  {snap.name}")
@@ -224,10 +278,10 @@ def _load_snapshots(
                         continue
                 except (ValueError, TypeError):
                     pass
-            all_tweets.append(item)
+            all_items.append(item)
             seen_ids.add(pid)
 
-    all_tweets.sort(
+    all_items.sort(
         key=lambda x: datetime.fromisoformat(x.get("date", "1970-01-01")),
         reverse=True,
     )
@@ -235,49 +289,368 @@ def _load_snapshots(
     # 下游模型优先用 translated_text（非英文已翻译），其次 clean_text，再次 content_text
     all_docs = [
         t.get("translated_text") or t.get("clean_text") or t.get("content_text", "")
-        for t in all_tweets
+        for t in all_items
     ]
 
-    if all_tweets:
-        newest = all_tweets[0]["date"][:10]
-        oldest = all_tweets[-1]["date"][:10]
+    if all_items:
+        newest = all_items[0]["date"][:10]
+        oldest = all_items[-1]["date"][:10]
         logger.info(f"merged {len(all_docs)} unique docs ({oldest} ~ {newest})")
     else:
         logger.info("merged 0 docs")
 
-    return all_docs, all_tweets
+    return all_docs, all_items
 
 
 def cmd_analyze(
     window: int = 5,
     max_age_days: int | None = None,
     pipeline_argv: list[str] | None = None,
+    sources: str = "*",
 ) -> None:
-    """合并最近 window 个快照，运行 BERTopic 全量分析。"""
-    docs, tweets = _load_snapshots(window, max_age_days)
+    """
+    合并最近 window 个快照（所有信源），运行 BERTopic 全量分析。
+
+    Args:
+        window:       合并最近 N 个快照
+        max_age_days: 丢弃超过 N 天的记录
+        pipeline_argv: 额外传给 pipeline.py 的参数列表
+        sources:      快照前缀过滤，"*" = 全部，"twitter" = 仅推文
+    """
+    docs, items = _load_snapshots(window, max_age_days, sources=sources)
     if not docs:
         logger.warning("no docs available, abort analysis")
         return
 
-    merged_json = PROJECT_DIR / "data" / "twitter_texts.json"
+    # 合并输出文件名：全量合并用 merged_texts.json，单信源保留原名
+    if sources == "*":
+        merged_json = PROJECT_DIR / "data" / "merged_texts.json"
+    else:
+        merged_json = PROJECT_DIR / "data" / f"{sources}_texts.json"
 
-    # 关键修改：将处理后的文本写入 content_text 字段
-    # 优先级：translated_text > clean_text > content_text
-    for t in tweets:
-        t["content_text"] = t.get("translated_text") or t.get("clean_text") or t.get("content_text", "")
+    # 将最终文本写入 content_text 字段（优先级：translated > clean > raw）
+    for item in items:
+        item["content_text"] = (
+            item.get("translated_text") or item.get("clean_text") or item.get("content_text", "")
+        )
 
-    payload = build_payload(tweets, [])
+    payload = build_payload(items, [])
     save_json(payload, merged_json)
 
     argv = ["--input-json", str(merged_json)] + (pipeline_argv or [])
     config = parse_config(argv=argv)
 
-    logger.info("BERTopic pipeline start")
+    logger.info(f"BERTopic pipeline start | sources={sources!r} docs={len(docs)}")
     run_pipeline(config, quiet=True)
 
     from pipeline_io import load_docs as _load_docs_for_stats
     analyzed_docs = _load_docs_for_stats(config.input_json)
     logger.info(f"pipeline done | docs={len(analyzed_docs)} → {config.output_dir}")
+
+
+# ─── 多信源调度：sources.yaml 驱动 ───────────────────────────────────────────
+
+def load_sources_config(config_path: Path = SOURCES_CONFIG) -> dict:
+    """加载 crawl/sources.yaml，返回解析后的配置字典。"""
+    if not config_path.exists():
+        raise FileNotFoundError(
+            f"信源配置文件不存在：{config_path}\n"
+            "  请确认 crawl/sources.yaml 已创建（参考项目文档）"
+        )
+    with config_path.open("r", encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+
+
+def cmd_run_source(source_id: str, config_path: Path = SOURCES_CONFIG) -> None:
+    """
+    执行 sources.yaml 中指定 id 的单个信源采集任务。
+    主要供系统 cron / 调度器调用，也可手动触发测试。
+
+    Args:
+        source_id:   sources.yaml 中 source 的 id 字段
+        config_path: 信源配置文件路径（默认 crawl/sources.yaml）
+    """
+    cfg = load_sources_config(config_path)
+    source = next((s for s in cfg.get("sources", []) if s["id"] == source_id), None)
+    if source is None:
+        raise ValueError(
+            f"未知信源 id: {source_id!r}\n"
+            f"  可用 id: {[s['id'] for s in cfg.get('sources', [])]}"
+        )
+
+    source_type = source["type"]
+    params = source.get("params", {})
+    logger.info(f"[run-source] 执行信源: id={source_id!r} type={source_type!r}")
+
+    if source_type == "twitter":
+        api_key = (
+            os.getenv(params.get("api_key_env", "TWTAPI_KEY"))
+            or os.getenv("TWT_API_KEY")
+            or ""
+        )
+        if not api_key:
+            logger.error(f"[run-source] Twitter 信源 '{source_id}': TWTAPI_KEY 未设置，跳过")
+            return
+        if params.get("from_yaml"):
+            usernames = load_usernames_from_yaml(USERS_YAML)
+        else:
+            usernames = [
+                u for u in (_extract_username(u) for u in params.get("usernames", [])) if u
+            ]
+        if params.get("sample"):
+            usernames = random.sample(usernames, min(params["sample"], len(usernames)))
+        cmd_crawl(
+            usernames=usernames,
+            api_key=api_key,
+            max_tweets=params.get("max_tweets", 200),
+            translate=params.get("translate", False),
+        )
+
+    elif source_type == "mindspider":
+        date_str = params.get("date")
+        target_date = date_type.fromisoformat(date_str) if date_str else None
+        mindspider_dir = params.get("mindspider_dir")
+        cmd_crawl_mindspider(
+            platforms=params.get("platforms"),
+            target_date=target_date,
+            run_spider=params.get("run_spider", False),
+            test_mode=params.get("test_mode", False),
+            translate=params.get("translate", False),
+            mindspider_dir=Path(mindspider_dir) if mindspider_dir else None,
+        )
+
+    elif source_type == "zhihu":
+        if params.get("from_yaml"):
+            ZHIHU_CRAWLER_DIR = PROJECT_DIR / "crawl" / "zhihu_crawler"
+            sys.path.insert(0, str(ZHIHU_CRAWLER_DIR))
+            from zhihu.providers.firecrawl import load_question_targets
+            questions = load_question_targets(questions_file=str(ZHIHU_QUESTIONS_YAML))
+        else:
+            questions = params.get("question_ids", [])
+        cmd_zhihu_crawl(questions=questions, max_answers=params.get("max_answers"))
+
+    else:
+        raise ValueError(f"不支持的信源类型: {source_type!r}，支持: twitter, mindspider, zhihu")
+
+
+# ─── Cron 安装辅助 ────────────────────────────────────────────────────────────
+
+def _generate_crontab_lines(config_path: Path = SOURCES_CONFIG) -> list[str]:
+    """
+    根据 sources.yaml 生成对应的 crontab 条目列表。
+    每个条目调用 `python scheduled.py run-source --id <id>`，日志写入 logs/。
+    """
+    cfg = load_sources_config(config_path)
+    python = sys.executable
+    script = str(PROJECT_DIR / "scheduled.py")
+    cwd = str(PROJECT_DIR)
+    logs = str(LOGS_DIR)
+
+    lines: list[str] = []
+
+    for source in cfg.get("sources", []):
+        if not source.get("enabled", True):
+            continue
+        cron_expr = source.get("cron", "")
+        if not cron_expr:
+            logger.warning(f"[cron] 信源 '{source['id']}' 缺少 cron 字段，跳过")
+            continue
+        sid = source["id"]
+        log_file = f"{logs}/cron_{sid}.log"
+        line = (
+            f"{cron_expr}  "
+            f"cd {cwd} && {python} {script} run-source --id {sid} "
+            f">> {log_file} 2>&1"
+        )
+        lines.append(line)
+
+    analysis = cfg.get("analysis", {})
+    if analysis.get("enabled", True) and analysis.get("cron"):
+        window = analysis.get("window", 5)
+        sources_filter = analysis.get("sources", "*")
+        extra_args = " ".join(str(a) for a in analysis.get("pipeline_args", []))
+        log_file = f"{logs}/cron_analysis.log"
+        line = (
+            f"{analysis['cron']}  "
+            f"cd {cwd} && {python} {script} analyze "
+            f"--window {window} --sources {sources_filter}"
+            + (f" {extra_args}" if extra_args else "")
+            + f" >> {log_file} 2>&1"
+        )
+        lines.append(line)
+
+    return lines
+
+
+def cmd_cron_show(config_path: Path = SOURCES_CONFIG) -> None:
+    """
+    打印将被安装的 crontab 条目（dry-run，不修改系统 crontab）。
+
+    示例：
+      uv run python scheduled.py cron-show
+    """
+    lines = _generate_crontab_lines(config_path)
+    if not lines:
+        print("# 没有启用的信源，无条目生成")
+        return
+    print("# BerTopic 自动生成的 crontab 条目")
+    print("# 手动安装：将以下内容粘贴到 `crontab -e`")
+    print("# 或运行：  uv run python scheduled.py cron-install")
+    print()
+    for line in lines:
+        print(line)
+
+
+def cmd_cron_install(config_path: Path = SOURCES_CONFIG) -> None:
+    """
+    将 crontab 条目安装到系统 crontab。
+
+    - 自动读取现有 crontab，过滤掉旧 BerTopic 条目后追加新条目。
+    - 安装前会先创建 logs/ 目录。
+    - 需要系统已安装 `crontab` 命令（Linux / macOS）。
+
+    示例：
+      uv run python scheduled.py cron-install
+    """
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+    new_lines = _generate_crontab_lines(config_path)
+    if not new_lines:
+        logger.warning("[cron-install] 没有启用的信源，crontab 未修改")
+        return
+
+    # 读取现有 crontab
+    try:
+        result = subprocess.run(
+            ["crontab", "-l"],
+            capture_output=True, text=True,
+        )
+        existing = result.stdout if result.returncode == 0 else ""
+    except FileNotFoundError:
+        logger.error("[cron-install] 系统未安装 crontab，请手动将条目添加到调度系统")
+        cmd_cron_show(config_path)
+        return
+
+    # 过滤掉旧的 BerTopic 自动生成条目（避免重复安装）
+    kept_lines = [
+        line for line in existing.splitlines()
+        if "scheduled.py" not in line and "BerTopic" not in line
+    ]
+
+    all_lines = (
+        kept_lines
+        + ["", "# BerTopic scheduled crawl (auto-generated — do not edit manually)"]
+        + new_lines
+        + [""]
+    )
+    new_crontab = "\n".join(all_lines)
+
+    proc = subprocess.run(["crontab", "-"], input=new_crontab, text=True)
+    if proc.returncode == 0:
+        logger.info(f"[cron-install] 成功安装 {len(new_lines)} 个 crontab 条目")
+        for line in new_lines:
+            logger.info(f"  {line}")
+    else:
+        logger.error("[cron-install] crontab 安装失败，请手动运行 `crontab -e` 并粘贴以下条目：")
+        cmd_cron_show(config_path)
+
+
+# ─── Python 调度器守护进程 ────────────────────────────────────────────────────
+
+def _next_run(cron_expr: str, after: datetime) -> datetime:
+    """使用 croniter 计算 cron 表达式在 after 时间之后的下一次触发时刻。"""
+    try:
+        from croniter import croniter
+    except ImportError:
+        raise RuntimeError(
+            "croniter 未安装。请运行：\n"
+            "  uv add croniter\n"
+            "或：pip install croniter"
+        )
+    return croniter(cron_expr, after).get_next(datetime)
+
+
+def cmd_scheduler(config_path: Path = SOURCES_CONFIG) -> None:
+    """
+    启动长期运行的 Python 调度器守护进程。
+
+    读取 crawl/sources.yaml，按各信源的 cron 表达式自动触发采集任务，
+    无需系统级 cron（适合容器或无 crontab 权限的环境）。
+
+    - 使用最小堆按下次触发时间排序，精度：分钟级
+    - Ctrl+C 安全退出
+    - 单次任务失败不影响其他任务继续调度
+
+    示例：
+      uv run python scheduled.py scheduler
+      # 或后台运行：
+      nohup uv run python scheduled.py scheduler > logs/scheduler.log 2>&1 &
+    """
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
+    cfg = load_sources_config(config_path)
+    now = datetime.now()
+
+    # 最小堆元素：(next_run: datetime, task_id: str, task_cfg: dict)
+    # datetime 可直接比较，heapq 按第一元素排序
+    heap: list[tuple[datetime, str, dict]] = []
+
+    for source in cfg.get("sources", []):
+        if not source.get("enabled", True):
+            logger.info(f"[scheduler] 跳过已禁用信源: {source['id']}")
+            continue
+        cron_expr = source.get("cron", "")
+        if not cron_expr:
+            logger.warning(f"[scheduler] 信源 '{source['id']}' 缺少 cron 字段，跳过")
+            continue
+        next_t = _next_run(cron_expr, now)
+        heapq.heappush(heap, (next_t, source["id"], source))
+        logger.info(f"[scheduler] 注册信源: {source['id']} | 下次运行: {next_t.strftime('%Y-%m-%d %H:%M')}")
+
+    analysis_cfg = cfg.get("analysis", {})
+    if analysis_cfg.get("enabled", True) and analysis_cfg.get("cron"):
+        next_t = _next_run(analysis_cfg["cron"], now)
+        heapq.heappush(heap, (next_t, "_analysis", analysis_cfg))
+        logger.info(f"[scheduler] 注册分析任务 | 下次运行: {next_t.strftime('%Y-%m-%d %H:%M')}")
+
+    if not heap:
+        logger.warning("[scheduler] 没有任何启用的任务，退出")
+        return
+
+    logger.info(f"[scheduler] 已启动，监控 {len(heap)} 个任务（Ctrl+C 退出）")
+
+    try:
+        while heap:
+            next_run_time, task_id, task_cfg = heapq.heappop(heap)
+            sleep_secs = (next_run_time - datetime.now()).total_seconds()
+
+            if sleep_secs > 0:
+                logger.info(
+                    f"[scheduler] 休眠 {sleep_secs/60:.1f} min → "
+                    f"下次任务: {task_id!r} @ {next_run_time.strftime('%Y-%m-%d %H:%M')}"
+                )
+                time.sleep(sleep_secs)
+
+            # 执行任务
+            logger.info(f"[scheduler] ▶ 开始执行: {task_id!r}")
+            try:
+                if task_id == "_analysis":
+                    cmd_analyze(
+                        window=task_cfg.get("window", 5),
+                        pipeline_argv=task_cfg.get("pipeline_args") or [],
+                        sources=task_cfg.get("sources", "*"),
+                    )
+                else:
+                    cmd_run_source(task_id, config_path)
+                logger.info(f"[scheduler] ✓ 完成: {task_id!r}")
+            except Exception as exc:
+                logger.error(f"[scheduler] ✗ 任务失败: {task_id!r} — {exc}")
+
+            # 重新计算下次触发时间并入堆
+            next_t = _next_run(task_cfg["cron"], datetime.now())
+            heapq.heappush(heap, (next_t, task_id, task_cfg))
+
+    except KeyboardInterrupt:
+        logger.info("[scheduler] 收到 Ctrl+C，调度器退出")
 
 
 # ─── CLI ─────────────────────────────────────────────────────────────────────
@@ -302,6 +675,8 @@ def main() -> None:
     p_analyze = subparsers.add_parser("analyze", help="合并快照并运行 pipeline")
     p_analyze.add_argument("--window", type=int, default=5)
     p_analyze.add_argument("--max-age-days", type=int, metavar="D")
+    p_analyze.add_argument("--sources", default="*",
+                           help="快照前缀过滤：'*'=全部, 'twitter', 'mindspider' 等（默认 *）")
     p_analyze.add_argument("--pipeline-args", nargs=argparse.REMAINDER, default=[])
 
     # --- mindspider ---
@@ -347,7 +722,57 @@ def main() -> None:
     p_all.add_argument("--translate", action="store_true", default=False)
     p_all.add_argument("--api-key", default=os.getenv("TWTAPI_KEY"))
     p_all.add_argument("--window", type=int, default=5)
+    p_all.add_argument("--sources", default="*",
+                       help="分析时的快照前缀过滤（默认 *）")
     p_all.add_argument("--pipeline-args", nargs=argparse.REMAINDER, default=[])
+
+    # --- run-source ---
+    p_run_source = subparsers.add_parser(
+        "run-source",
+        help="执行 sources.yaml 中指定 id 的单个信源（供 cron / scheduler 调用）",
+    )
+    p_run_source.add_argument(
+        "--id", required=True, metavar="SOURCE_ID",
+        help="sources.yaml 中的信源 id，例如 twitter_ai_researchers",
+    )
+    p_run_source.add_argument(
+        "--config", type=Path, default=SOURCES_CONFIG,
+        metavar="PATH",
+        help=f"信源配置文件路径（默认 {SOURCES_CONFIG}）",
+    )
+
+    # --- scheduler ---
+    p_scheduler = subparsers.add_parser(
+        "scheduler",
+        help="启动 Python 调度器守护进程，按 sources.yaml 中的 cron 定时采集（无需系统 cron）",
+    )
+    p_scheduler.add_argument(
+        "--config", type=Path, default=SOURCES_CONFIG,
+        metavar="PATH",
+        help=f"信源配置文件路径（默认 {SOURCES_CONFIG}）",
+    )
+
+    # --- cron-show ---
+    p_cron_show = subparsers.add_parser(
+        "cron-show",
+        help="打印将被安装的 crontab 条目（dry-run）",
+    )
+    p_cron_show.add_argument(
+        "--config", type=Path, default=SOURCES_CONFIG,
+        metavar="PATH",
+        help=f"信源配置文件路径（默认 {SOURCES_CONFIG}）",
+    )
+
+    # --- cron-install ---
+    p_cron_install = subparsers.add_parser(
+        "cron-install",
+        help="将 sources.yaml 中启用的信源安装到系统 crontab",
+    )
+    p_cron_install.add_argument(
+        "--config", type=Path, default=SOURCES_CONFIG,
+        metavar="PATH",
+        help=f"信源配置文件路径（默认 {SOURCES_CONFIG}）",
+    )
 
     args = parser.parse_args()
 
@@ -391,6 +816,7 @@ def main() -> None:
             window=args.window,
             max_age_days=args.max_age_days,
             pipeline_argv=args.pipeline_args,
+            sources=args.sources,
         )
 
     elif args.cmd == "all":
@@ -402,7 +828,20 @@ def main() -> None:
             window=args.window,
             max_age_days=args.max_age_days,
             pipeline_argv=getattr(args, "pipeline_args", []),
+            sources=args.sources,
         )
+
+    elif args.cmd == "run-source":
+        cmd_run_source(source_id=args.id, config_path=args.config)
+
+    elif args.cmd == "scheduler":
+        cmd_scheduler(config_path=args.config)
+
+    elif args.cmd == "cron-show":
+        cmd_cron_show(config_path=args.config)
+
+    elif args.cmd == "cron-install":
+        cmd_cron_install(config_path=args.config)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,74 @@
+# crawl/sources.yaml — 多信源采集调度配置
+# ============================================================
+# 本文件定义所有爬取信源的参数和调度频率。
+# 由 scheduled.py 的 scheduler / cron-install / run-source 命令读取。
+#
+# cron 字段格式（标准 5 字段）：
+#   "分  时  日  月  周"
+#   示例：
+#     "0 */6 * * *"   每6小时整点运行
+#     "30 7 * * *"    每天 07:30 运行
+#     "0 2 * * 1"     每周一 02:00 运行
+#
+# 每个信源的 type 对应 scheduled.py 中的爬取函数：
+#   twitter    → cmd_crawl()
+#   mindspider → cmd_crawl_mindspider()
+#   zhihu      → cmd_zhihu_crawl()
+# ============================================================
+
+# ─── 采集信源 ──────────────────────────────────────────────────────────────────
+sources:
+
+  # Twitter / X — AI 研究者和机构
+  - id: twitter_ai_researchers
+    type: twitter
+    cron: "0 */6 * * *"          # 每 6 小时采集一次
+    enabled: true
+    description: "从 users.yaml 采集 AI 研究者推文"
+    params:
+      from_yaml: true            # 从 users.yaml 读取账号列表
+      max_tweets: 50             # 每个账号最多取 50 条
+      translate: false           # 不自动翻译（节省 API 费用）
+      # sample: 20               # 取消注释以随机抽样（调试用）
+      # api_key_env: TWTAPI_KEY  # 默认读取 TWTAPI_KEY 环境变量
+
+  # MindSpider (BettaFish) — 中文社交平台
+  - id: mindspider_chinese_social
+    type: mindspider
+    cron: "30 7 * * *"           # 每天 07:30 采集
+    enabled: false               # ⚠ 需要先配置 MindSpider + 数据库才能启用
+    description: "从小红书、微博、知乎、B站采集中文内容"
+    params:
+      platforms:
+        - xhs                    # 小红书 Xiaohongshu
+        - wb                     # 微博 Weibo
+        - zhihu                  # 知乎
+        - bili                   # 哔哩哔哩 Bilibili
+      run_spider: false          # true = 先运行 MindSpider 爬虫，false = 仅读 DB
+      translate: false           # true = 将中文内容翻译为英文（需要 OPENAI_API_KEY）
+      # mindspider_dir: null     # MindSpider 安装目录（null = crawl/MindSpider/）
+
+  # 知乎 — 通过 Firecrawl 抓取问题回答
+  - id: zhihu_firecrawl
+    type: zhihu
+    cron: "0 9 * * *"            # 每天 09:00 采集
+    enabled: false               # ⚠ 需要配置 FIRECRAWL_API_KEY
+    description: "使用 Firecrawl 抓取知乎问题回答"
+    params:
+      from_yaml: true            # 从 crawl/zhihu_crawler/config/questions.yaml 读取
+      max_answers: 30            # 每个问题最多抓 30 条回答
+      # question_ids:            # 也可直接指定问题 ID 列表：
+      #   - "12345678"
+      #   - "87654321"
+
+
+# ─── 分析任务 ──────────────────────────────────────────────────────────────────
+# 合并最近 N 个快照（所有信源）并运行 BERTopic pipeline
+analysis:
+  cron: "0 */8 * * *"            # 每 8 小时运行一次分析
+  enabled: true
+  window: 7                      # 合并最近 7 个快照
+  sources: "*"                   # "*" = 所有信源；也可指定 "twitter" / "mindspider"
+  description: "合并所有信源快照并运行 BERTopic 主题分析"
+  pipeline_args: []              # 透传给 pipeline.py 的额外参数，例如：
+                                 # ["--disable-llm", "--n-clusters", "12"]

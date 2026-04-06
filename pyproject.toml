@@ -16,6 +16,8 @@ dependencies = [
     "pyyaml>=6.0",
     "requests>=2.31.0",
     "scrapy>=2.14.2",
+    "croniter>=1.3.0",           # cron 表达式解析（scheduler / cron-install 命令使用）
+    "loguru>=0.7.0",
 ]
 
 [dependency-groups]
