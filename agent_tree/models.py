@@ -10,9 +10,70 @@ agent_tree/models.py — 所有 Agent 间传递的结构化数据契约
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 from pydantic import BaseModel, Field
+
+
+# ─── 分层模型配置（哑铃形参数分配）────────────────────────────────────────────
+
+@dataclass
+class ModelConfig:
+    """
+    各层 Agent 使用的模型配置。
+
+    设计原则：哑铃形，而非严格递减。
+
+    认知难度分析：
+      BatchAgent    ← 最脏的任务：原始噪声社交媒体 NLU（slang/截断/讽刺/隐含）
+      Meeting       ← 较简单：比较两份结构化 JSON 是否真正重叠
+      PlatformAgent ← 中等：结构化数据上的编排与汇总
+      HeadAgent     ← 战略推理：输入已干净，但最终报告质量最关键
+
+    推荐配置（成本 vs 质量的 Pareto 前沿）：
+      head_model     = "gpt-4o"        大模型，终稿质量最重要
+      platform_model = "gpt-4o-mini"   结构化编排，mini 足够
+      meeting_model  = "gpt-4o-mini"   JSON 比对，最简单任务
+      batch_model    = "gpt-4o-mini"   量大，mini 为基础但可升级到 gpt-4o
+
+    如果预算充足：batch_model 升到 "gpt-4o" 效果提升最明显，
+    因为底层提取质量决定了整棵树的信息天花板。
+    """
+    head_model:     str = "gpt-4o"
+    platform_model: str = "gpt-4o-mini"
+    meeting_model:  str = "gpt-4o-mini"
+    batch_model:    str = "gpt-4o-mini"
+
+    @classmethod
+    def economy(cls) -> "ModelConfig":
+        """全部使用 mini，适合测试/预算有限场景。"""
+        return cls(
+            head_model="gpt-4o-mini",
+            platform_model="gpt-4o-mini",
+            meeting_model="gpt-4o-mini",
+            batch_model="gpt-4o-mini",
+        )
+
+    @classmethod
+    def performance(cls) -> "ModelConfig":
+        """头部和批次都用大模型，质量最优。"""
+        return cls(
+            head_model="gpt-4o",
+            platform_model="gpt-4o-mini",
+            meeting_model="gpt-4o-mini",
+            batch_model="gpt-4o",
+        )
+
+    @classmethod
+    def from_single(cls, model: str) -> "ModelConfig":
+        """所有层使用同一模型（兼容旧接口）。"""
+        return cls(
+            head_model=model,
+            platform_model=model,
+            meeting_model=model,
+            batch_model=model,
+        )
 
 
 # ─── 原子信号（一个 Agent 发现的一个话题/观点）────────────────────────────────

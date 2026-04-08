@@ -18,7 +18,7 @@ from pathlib import Path
 from openai import AsyncOpenAI
 from loguru import logger
 
-from .models import FinalReport, PlatformSummary, Signal
+from .models import FinalReport, PlatformSummary, Signal, ModelConfig
 from .llm import llm_json, get_api_call_count
 
 # ─── Prompt ──────────────────────────────────────────────────────────────────
@@ -81,14 +81,15 @@ class HeadAgent:
         query_anchor: str,
         platform_posts: dict[str, list[dict]],
         client: AsyncOpenAI,
-        model: str = "gpt-4o-mini",
+        model_config: ModelConfig | None = None,
         save_dir: Path | None = None,
         max_concurrent_batches: int = 8,
     ) -> None:
         self.query_anchor = query_anchor
         self._platform_posts = platform_posts
         self._client = client
-        self._model = model
+        self._model_config = model_config or ModelConfig()
+        self._model = self._model_config.head_model  # 顶层使用最强模型
         self._save_dir = save_dir
         self._max_concurrent = max_concurrent_batches
 
@@ -107,7 +108,7 @@ class HeadAgent:
                 posts=posts,
                 query_anchor=self.query_anchor,
                 client=self._client,
-                model=self._model,
+                model_config=self._model_config,
                 save_dir=platform_save,
                 max_concurrent_batches=self._max_concurrent,
             )

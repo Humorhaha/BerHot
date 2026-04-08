@@ -17,7 +17,7 @@ from pathlib import Path
 from openai import AsyncOpenAI
 from loguru import logger
 
-from .models import AgentSummary, PlatformSummary, Signal
+from .models import AgentSummary, PlatformSummary, Signal, ModelConfig
 from .batch_agent import BatchAgent
 from .meeting import run_meetings
 from .llm import llm_json
@@ -88,7 +88,7 @@ class PlatformAgent:
         posts: list[dict],
         query_anchor: str,
         client: AsyncOpenAI,
-        model: str = "gpt-4o-mini",
+        model_config: ModelConfig | None = None,
         save_dir: Path | None = None,
         max_concurrent_batches: int = 8,
         seed: int = 42,
@@ -96,7 +96,8 @@ class PlatformAgent:
         self.platform = platform
         self.query_anchor = query_anchor
         self._client = client
-        self._model = model
+        self._model_config = model_config or ModelConfig()
+        self._model = self._model_config.platform_model
         self._save_dir = save_dir
         self._max_concurrent = max_concurrent_batches
 
@@ -146,7 +147,7 @@ class PlatformAgent:
                 posts=batch_posts,
                 query_anchor=self.query_anchor,
                 client=self._client,
-                model=self._model,
+                model_config=self._model_config,
                 save_dir=batch_save_dir,
             )
             agent.batch_index = idx  # type: ignore[attr-defined]
@@ -163,7 +164,7 @@ class PlatformAgent:
             summaries,
             query_anchor=self.query_anchor,
             client=self._client,
-            model=self._model,
+            model_config=self._model_config,
         )
 
         # ── 3. 整合所有信号，构建 PlatformSummary ──

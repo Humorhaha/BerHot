@@ -18,7 +18,7 @@ from openai import AsyncOpenAI
 from loguru import logger
 import asyncio
 
-from .models import AgentSummary, MeetingResult, Signal
+from .models import AgentSummary, MeetingResult, Signal, ModelConfig
 from .llm import llm_json
 
 # ─── Prompt ──────────────────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ async def run_meetings(
     summaries: list[AgentSummary],
     query_anchor: str,
     client: AsyncOpenAI,
-    model: str = "gpt-4o-mini",
+    model_config: ModelConfig | None = None,
     max_concurrent_meetings: int = 5,
 ) -> tuple[list[MeetingResult], list[AgentSummary]]:
     """
@@ -158,6 +158,9 @@ async def run_meetings(
     Returns:
         (meeting_results, updated_summaries)
     """
+    cfg = model_config or ModelConfig()
+    meeting_model = cfg.meeting_model
+
     groups = _build_fingerprint_groups(summaries)
     if not groups:
         logger.info("无指纹重叠，跳过会议阶段")
@@ -168,7 +171,7 @@ async def run_meetings(
 
     async def _guarded_meeting(fingerprint, entries):
         async with semaphore:
-            return await _run_single_meeting(fingerprint, entries, query_anchor, client, model)
+            return await _run_single_meeting(fingerprint, entries, query_anchor, client, meeting_model)
 
     tasks = [_guarded_meeting(fp, entries) for fp, entries in groups]
     raw_results = await asyncio.gather(*tasks, return_exceptions=True)

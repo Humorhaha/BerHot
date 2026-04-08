@@ -23,7 +23,7 @@ from openai import AsyncOpenAI
 
 from .head_agent import HeadAgent
 from .llm import reset_api_call_count, get_api_call_count
-from .models import FinalReport
+from .models import FinalReport, ModelConfig
 
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
@@ -82,7 +82,9 @@ async def run_aat(
     platforms: list[str] | None = None,
     snapshot_dir: Path | None = None,
     window: int = 5,
-    model: str = "gpt-4o-mini",
+    model_config: ModelConfig | None = None,
+    # 兼容旧接口：单一模型名会自动构建 ModelConfig.from_single()
+    model: str | None = None,
     openai_api_key: str | None = None,
     openai_base_url: str | None = None,
     save_dir: Path | None = None,
@@ -92,14 +94,15 @@ async def run_aat(
     运行完整的 AgentAttentionTree 分析。
 
     Args:
-        query_anchor: 分析目标（例如："AI 监管政策的公众态度"）
-        platforms: 要分析的平台，默认 ["twitter", "zhihu"]
-        snapshot_dir: 快照目录，默认 data/snapshots/
-        window: 每个平台最多加载最近 N 个快照
-        model: OpenAI 模型名称
-        openai_api_key: API key（默认读取 OPENAI_API_KEY 环境变量）
-        openai_base_url: 自定义 API 地址（用于兼容接口）
-        save_dir: 保存中间产物和报告的目录
+        query_anchor:         分析目标（例如："AI 监管政策的公众态度"）
+        platforms:            要分析的平台，默认 ["twitter", "zhihu"]
+        snapshot_dir:         快照目录，默认 data/snapshots/
+        window:               每个平台最多加载最近 N 个快照
+        model_config:         分层模型配置（推荐），优先级高于 model
+        model:                单一模型名（兼容旧接口，所有层使用同一模型）
+        openai_api_key:       API key（默认读取 OPENAI_API_KEY 环境变量）
+        openai_base_url:      自定义 API 地址（用于兼容接口）
+        save_dir:             保存中间产物和报告的目录
         max_concurrent_batches: 并发 BatchAgent 数量上限
 
     Returns:
@@ -113,6 +116,10 @@ async def run_aat(
         ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         save_dir = REPORT_DIR / f"run_{ts}"
 
+    # 解析模型配置：model_config 优先，其次 model 单一值，最后用默认哑铃配置
+    if model_config is None:
+        model_config = ModelConfig.from_single(model) if model else ModelConfig()
+
     reset_api_call_count()
 
     # ── 加载数据 ──
@@ -121,7 +128,13 @@ async def run_aat(
         raise ValueError("没有找到任何数据，请先运行爬虫采集数据")
 
     total_posts = sum(len(p) for p in platform_posts.values())
-    logger.info(f"AAT 启动 | query='{query_anchor}' | 总帖子={total_posts} | 模型={model}")
+    logger.info(
+        f"AAT 启动 | query='{query_anchor}' | 总帖子={total_posts} | "
+        f"模型配置: head={model_config.head_model} / "
+        f"platform={model_config.platform_model} / "
+        f"meeting={model_config.meeting_model} / "
+        f"batch={model_config.batch_model}"
+    )
 
     # ── 构建 OpenAI 客户端 ──
     api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
@@ -141,7 +154,7 @@ async def run_aat(
         query_anchor=query_anchor,
         platform_posts=platform_posts,
         client=client,
-        model=model,
+        model_config=model_config,
         save_dir=save_dir,
         max_concurrent_batches=max_concurrent_batches,
     )

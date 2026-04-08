@@ -10,7 +10,7 @@ agent_tree — AgentAttentionTree 舆情分析框架
           └── BatchAgent × M  →  稀疏指纹会议  →  PlatformSummary
 """
 
-from .models import Signal, AgentSummary, MeetingResult, PlatformSummary, FinalReport
+from .models import Signal, AgentSummary, MeetingResult, PlatformSummary, FinalReport, ModelConfig
 from .pipeline import run_aat
 
 __all__ = [
@@ -19,5 +19,6 @@ __all__ = [
     "MeetingResult",
     "PlatformSummary",
     "FinalReport",
+    "ModelConfig",
     "run_aat",
 ]

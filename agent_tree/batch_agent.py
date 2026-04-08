@@ -19,7 +19,7 @@ from pathlib import Path
 from openai import AsyncOpenAI
 from loguru import logger
 
-from .models import AgentSummary, Signal
+from .models import AgentSummary, Signal, ModelConfig
 from .llm import llm_json
 
 # ─── Prompt 模板 ─────────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ class BatchAgent:
         posts: list[dict],
         query_anchor: str,
         client: AsyncOpenAI,
-        model: str = "gpt-4o-mini",
+        model_config: ModelConfig | None = None,
         save_dir: Path | None = None,
     ) -> None:
         self.agent_id = agent_id
@@ -82,7 +82,7 @@ class BatchAgent:
         self.posts = posts
         self.query_anchor = query_anchor
         self._client = client
-        self._model = model
+        self._model = (model_config or ModelConfig()).batch_model
         self._save_dir = save_dir
         self._summary: AgentSummary | None = None
 

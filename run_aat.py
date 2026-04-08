@@ -4,20 +4,27 @@ run_aat.py — AgentAttentionTree CLI 入口
 
 用法示例：
 
-  # 分析 AI 监管话题（默认加载最近 5 个快照）
+  # 默认配置（哑铃形：head=gpt-4o, 其余=gpt-4o-mini）
   uv run python run_aat.py --query "AI监管政策的公众态度"
 
-  # 指定平台和窗口
-  uv run python run_aat.py --query "大模型竞争格局" --platforms twitter zhihu --window 3
+  # 预算模式：全部 mini（测试用）
+  uv run python run_aat.py --query "大模型竞争格局" --preset economy
 
-  # 使用更强的模型
-  uv run python run_aat.py --query "AI安全争论" --model gpt-4o
+  # 旗舰模式：head 和 batch 都用 gpt-4o
+  uv run python run_aat.py --query "AI安全争论" --preset performance
 
-  # 控制并发和输出目录
-  uv run python run_aat.py --query "开源vs闭源" --max-concurrent 5 --save-dir data/aat_reports/test_run
+  # 精细控制每层模型（覆盖 preset）
+  uv run python run_aat.py --query "开源vs闭源" \\
+      --head-model gpt-4o \\
+      --batch-model gpt-4o \\
+      --platform-model gpt-4o-mini \\
+      --meeting-model gpt-4o-mini
 
-  # 使用兼容 OpenAI API 的自定义端点（如 DeepSeek）
-  uv run python run_aat.py --query "大模型评测" --base-url https://api.deepseek.com/v1 --model deepseek-chat
+  # 使用 DeepSeek 等兼容接口
+  uv run python run_aat.py --query "大模型评测" \\
+      --base-url https://api.deepseek.com/v1 \\
+      --head-model deepseek-chat \\
+      --batch-model deepseek-chat
 """
 
 from __future__ import annotations
@@ -64,10 +71,35 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="N",
         help="每个平台最多加载最近 N 个快照（默认：5）",
     )
+    # ── 分层模型配置 ──────────────────────────────────────────────────────────
+    model_group = parser.add_argument_group(
+        "分层模型配置",
+        "各层 Agent 可独立指定模型。--preset 快捷设置全组，单独参数可覆盖 preset 的某一层。"
+    )
+    model_group.add_argument(
+        "--preset",
+        choices=["default", "economy", "performance"],
+        default="default",
+        help=(
+            "default   = head:gpt-4o, 其余:gpt-4o-mini（哑铃形，推荐）\n"
+            "economy   = 全部 gpt-4o-mini（节约成本/测试）\n"
+            "performance = head+batch:gpt-4o, 其余:gpt-4o-mini（质量最优）"
+        ),
+    )
+    model_group.add_argument("--head-model",     default=None, metavar="MODEL",
+                             help="HeadAgent 模型（覆盖 preset）")
+    model_group.add_argument("--platform-model", default=None, metavar="MODEL",
+                             help="PlatformAgent 模型（覆盖 preset）")
+    model_group.add_argument("--meeting-model",  default=None, metavar="MODEL",
+                             help="Meeting 模型（覆盖 preset）")
+    model_group.add_argument("--batch-model",    default=None, metavar="MODEL",
+                             help="BatchAgent 模型（覆盖 preset）")
+    # 兼容旧接口：--model 将所有层设为同一模型
     parser.add_argument(
         "--model",
-        default="gpt-4o-mini",
-        help="OpenAI 模型（默认：gpt-4o-mini，推荐节约成本）",
+        default=None,
+        metavar="MODEL",
+        help="（兼容旧接口）所有层使用同一模型，会被 --preset 和分层参数覆盖",
     )
     parser.add_argument(
         "--api-key",
@@ -113,13 +145,31 @@ def build_parser() -> argparse.ArgumentParser:
 
 async def _main(args: argparse.Namespace) -> None:
     from agent_tree.pipeline import run_aat
+    from agent_tree.models import ModelConfig
+
+    # ── 构建 ModelConfig ──
+    # 优先级：单层参数 > --preset > --model（兼容旧接口）
+    if args.model:
+        cfg = ModelConfig.from_single(args.model)
+    elif args.preset == "economy":
+        cfg = ModelConfig.economy()
+    elif args.preset == "performance":
+        cfg = ModelConfig.performance()
+    else:
+        cfg = ModelConfig()  # default 哑铃形
+
+    # 单层覆盖
+    if args.head_model:     cfg.head_model     = args.head_model
+    if args.platform_model: cfg.platform_model = args.platform_model
+    if args.meeting_model:  cfg.meeting_model  = args.meeting_model
+    if args.batch_model:    cfg.batch_model    = args.batch_model
 
     report = await run_aat(
         query_anchor=args.query,
         platforms=args.platforms,
         snapshot_dir=args.snapshot_dir,
         window=args.window,
-        model=args.model,
+        model_config=cfg,
         openai_api_key=args.api_key or os.getenv("OPENAI_API_KEY"),
         openai_base_url=args.base_url or os.getenv("OPENAI_BASE_URL"),
         save_dir=args.save_dir,
