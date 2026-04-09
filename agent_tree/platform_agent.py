@@ -19,7 +19,7 @@ from loguru import logger
 
 from .models import AgentSummary, PlatformSummary, Signal, ModelConfig
 from .batch_agent import BatchAgent
-from .meeting import run_meetings
+from .meeting_agent import run_meetings, _build_fingerprint_groups
 from .llm import llm_json
 
 # 平台感知切分参数
@@ -51,14 +51,17 @@ _PLATFORM_USER = """平台：{platform}
 Batch 数：{batch_count}
 会议场次：{meeting_count}
 
-各批次信号汇总（按 convergence_count × strength 降序）：
-{signals_text}
+信号概览（按 convergence_count × strength 降序，前15个）：
+{signals_overview}
 
-会议发现的收敛话题：
-{convergence_text}
+会议记录（高收敛会议含完整对话摘录，其余仅含结论）：
+{meeting_context}
 
-会议发现的矛盾：
-{contradictions_text}
+批次富文本分析（质量最高的批次）：
+{batch_context}
+
+待关注悬案（来自各会议）：
+{open_questions_text}
 
 请输出 JSON：
 {{
@@ -172,6 +175,68 @@ class PlatformAgent:
         logger.info(f"PlatformAgent [{self.platform}] done | top_signals={len(platform_summary.top_signals)}")
         return platform_summary
 
+    @staticmethod
+    def _build_meeting_context(meeting_results, top_k_full: int = 3) -> str:
+        """
+        分级构建会议摘要文本：
+          - 高收敛度（前 top_k_full 个）：传入完整 discussion_transcript
+          - 其余：只传 meeting_conclusion + open_questions
+        这样在保留最重要信息的同时控制 token 消耗。
+        """
+        if not meeting_results:
+            return "无会议记录"
+
+        # 按收敛强度排序
+        sorted_results = sorted(
+            meeting_results,
+            key=lambda r: r.convergence_strength,
+            reverse=True,
+        )
+
+        parts = []
+        for i, r in enumerate(sorted_results):
+            if i < top_k_full and r.is_genuine_convergence:
+                # 完整对话记录
+                transcript_preview = r.discussion_transcript[:600] + (
+                    "…（截断）" if len(r.discussion_transcript) > 600 else ""
+                )
+                parts.append(
+                    f"[会议: {r.refined_topic}] 收敛强度={r.convergence_strength:.2f}\n"
+                    f"  对话摘录：{transcript_preview}\n"
+                    f"  结论：{r.meeting_conclusion}"
+                )
+            else:
+                # 只传结论 + 悬案
+                open_q = "；".join(r.open_questions) if r.open_questions else "无"
+                status = "收敛" if r.is_genuine_convergence else "未收敛/误报"
+                parts.append(
+                    f"[会议: {r.refined_topic}] {status} 强度={r.convergence_strength:.2f}\n"
+                    f"  结论：{r.meeting_conclusion}\n"
+                    f"  悬案：{open_q}"
+                )
+
+        return "\n\n".join(parts)
+
+    @staticmethod
+    def _build_batch_context(summaries: list[AgentSummary], top_k: int = 5) -> str:
+        """
+        选取质量最高的 top_k 个 batch 的富文本分析传给 PlatformAgent LLM。
+        其余 batch 只用结构化信号。
+        """
+        sorted_summaries = sorted(
+            summaries, key=lambda s: s.batch_quality, reverse=True
+        )
+        parts = []
+        for s in sorted_summaries[:top_k]:
+            weak = "；".join(s.weak_signals[:2]) if s.weak_signals else "无"
+            parts.append(
+                f"[Batch {s.agent_id}] 质量={s.batch_quality:.2f} 噪声={s.noise_ratio:.2f}\n"
+                f"  分析：{s.narrative[:300]}{'…' if len(s.narrative) > 300 else ''}\n"
+                f"  质感：{s.discourse_texture}\n"
+                f"  弱信号：{weak}"
+            )
+        return "\n\n".join(parts) if parts else "无"
+
     async def _synthesize(
         self,
         summaries: list[AgentSummary],
@@ -183,27 +248,23 @@ class PlatformAgent:
         all_signals: list[Signal] = []
         for s in summaries:
             all_signals.extend(s.signals)
-
         all_signals.sort(key=lambda s: s.convergence_count * s.strength, reverse=True)
 
-        # 构建 LLM 输入文本
-        signals_text = "\n".join(
-            f"  - [{s.convergence_count}x收敛, 强度{s.strength:.2f}, 质量{s.quality:.2f}] "
-            f"{s.topic} | 指纹: {s.topic_fingerprint[:3]}"
-            for s in all_signals[:20]  # 只给 LLM 前 20 个信号，控制 token
+        # ── 分级构建上下文（核心改变）──
+        meeting_context = self._build_meeting_context(meeting_results, top_k_full=3)
+        batch_context = self._build_batch_context(summaries, top_k=5)
+
+        # 结构化信号概览（供排序参考）
+        signals_overview = "\n".join(
+            f"  [{s.convergence_count}x收敛 强度{s.strength:.2f} 质量{s.quality:.2f}] {s.topic}"
+            for s in all_signals[:15]
         )
 
-        conv_lines = [
-            f"  - '{r.refined_topic}' (强度{r.convergence_strength:.2f}, {len(r.participating_agent_ids)} 个 batch 参与)"
-            for r in meeting_results if r.is_genuine_convergence
-        ]
-        convergence_text = "\n".join(conv_lines) or "无"
-
-        contradiction_lines = []
+        # 收集所有 open_questions
+        all_open_questions = []
         for r in meeting_results:
-            for c in r.contradictions:
-                contradiction_lines.append(f"  - [{r.refined_topic}] {c}")
-        contradictions_text = "\n".join(contradiction_lines) or "无"
+            for q in r.open_questions:
+                all_open_questions.append(f"[{r.refined_topic}] {q}")
 
         system = _PLATFORM_SYSTEM.format(query_anchor=self.query_anchor)
         user = _PLATFORM_USER.format(
@@ -211,9 +272,10 @@ class PlatformAgent:
             total_posts=sum(s.raw_post_count for s in summaries),
             batch_count=len(summaries),
             meeting_count=len(meeting_results),
-            signals_text=signals_text,
-            convergence_text=convergence_text,
-            contradictions_text=contradictions_text,
+            signals_overview=signals_overview,
+            meeting_context=meeting_context,
+            batch_context=batch_context,
+            open_questions_text="\n".join(all_open_questions) or "无",
         )
 
         raw = await llm_json(self._client, system, user, model=self._model)
