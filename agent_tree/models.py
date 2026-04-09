@@ -173,10 +173,10 @@ class AgentSummary(BaseModel):
 #   - open_questions 是新增字段：会议无法解决的悬案，传递给 PlatformAgent
 
 class MeetingResult(BaseModel):
-    fingerprint_topic: str
+    fingerprint_topic: str = ""
     """触发此次会议的共享指纹关键词"""
 
-    participating_agent_ids: list[str]
+    participating_agent_ids: list[str] = Field(default_factory=list)
 
     # ── 主体：对话记录（最丰富）──────────────────────────────────────────────
     discussion_transcript: str = ""
