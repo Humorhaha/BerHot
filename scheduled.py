@@ -22,19 +22,25 @@
   # 3. 只分析（合并最近 5 个快照，含所有信源）
   uv run python scheduled.py analyze --window 5
 
-  # 4. 一次性完成（测试模式）
+  # 4. 对 Twitter 快照直接运行 XAnalyst
+  uv run python scheduled.py x-analyze --window 3
+
+  # 5. 抓取 Twitter 后直接运行 XAnalyst
+  uv run python scheduled.py x-all --sample 40 --api-key YOUR_KEY
+
+  # 6. 一次性完成（测试模式）
   uv run python scheduled.py all --sample 40 --api-key YOUR_KEY
 
-  # 5. 手动指定用户名
+  # 7. 手动指定用户名
   uv run python scheduled.py crawl --usernames elonmusk sama --api-key YOUR_KEY
 
-  # 6. 从 MindSpider（BettaFish）爬取中文社交平台
+  # 8. 从 MindSpider（BettaFish）爬取中文社交平台
   uv run python scheduled.py mindspider --platforms xhs wb zhihu --run-spider
 
-  # 7. 仅从 MindSpider 数据库读取（MindSpider 已运行过）
+  # 9. 仅从 MindSpider 数据库读取（MindSpider 已运行过）
   uv run python scheduled.py mindspider --platforms xhs wb --date 2026-04-04
 
-  # 8. 抓取知乎问题（Firecrawl）
+  # 10. 抓取知乎问题（Firecrawl）
   uv run python scheduled.py zhihu-crawl --from-yaml --max-answers 20
 
 定时调度（cron）：
@@ -54,6 +60,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import heapq
 import json
 import os
@@ -117,12 +124,30 @@ _load_env_chain(PROJECT_DIR)
 
 SNAPSHOT_DIR         = PROJECT_DIR / "data" / "snapshots"
 LOGS_DIR             = PROJECT_DIR / "logs"
+X_ANALYST_REPORT_DIR = PROJECT_DIR / "data" / "x_analyst_reports"
 USERS_YAML           = PROJECT_DIR / "users.yaml"
 SOURCES_CONFIG       = PROJECT_DIR / "crawl" / "sources.yaml"
 ZHIHU_QUESTIONS_YAML = PROJECT_DIR / "crawl" / "zhihu_crawler" / "config" / "questions.yaml"
 
 
 # ─── MindSpider 数据库连接字符串 ──────────────────────────────────────────────
+
+def _load_x_analyst_modules():
+    from agent_tree.x_analyst import (
+        analyze_x_posts,
+        _resolve_api_key,
+        _resolve_base_url,
+        _resolve_model_config,
+    )
+    from openai import AsyncOpenAI
+
+    return (
+        analyze_x_posts,
+        _resolve_model_config,
+        _resolve_api_key,
+        _resolve_base_url,
+        AsyncOpenAI,
+    )
 
 def _mindspider_db_url() -> str:
     """
@@ -359,6 +384,67 @@ def _load_snapshots(
     return all_docs, all_items
 
 
+def _prepare_x_analyst_posts(items: list[dict], limit: int | None = None) -> list[dict]:
+    posts: list[dict] = []
+    for item in items:
+        post = dict(item)
+        post["content_text"] = (
+            post.get("translated_text") or post.get("clean_text") or post.get("content_text", "")
+        )
+        if not str(post["content_text"]).strip():
+            continue
+        posts.append(post)
+
+    if limit is not None:
+        posts = posts[:limit]
+    return posts
+
+
+def _save_x_analyst_report(
+    summary: str,
+    posts: list[dict],
+    *,
+    window: int,
+    max_age_days: int | None,
+    model_config,
+) -> Path:
+    X_ANALYST_REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    report_path = X_ANALYST_REPORT_DIR / f"x_analyst_{ts}.json"
+
+    dates = sorted(
+        str(post.get("date", ""))
+        for post in posts
+        if str(post.get("date", "")).strip()
+    )
+
+    payload = {
+        "site": "X / Twitter",
+        "source_meta": {
+            "platform": "twitter",
+            "extractor": "scheduled.x_analyze",
+            "targets": ["twitter"],
+        },
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "window": window,
+        "max_age_days": max_age_days,
+        "post_count": len(posts),
+        "date_range": {
+            "oldest": dates[0] if dates else None,
+            "newest": dates[-1] if dates else None,
+        },
+        "model_config": {
+            "head_model": getattr(model_config, "head_model", None),
+            "platform_model": getattr(model_config, "platform_model", None),
+            "meeting_model": getattr(model_config, "meeting_model", None),
+            "batch_model": getattr(model_config, "batch_model", None),
+        },
+        "summary": summary,
+    }
+    save_json(payload, report_path)
+    return report_path
+
+
 def cmd_analyze(
     window: int = 5,
     max_age_days: int | None = None,
@@ -408,6 +494,87 @@ def cmd_analyze(
     logger.info(f"pipeline done | docs={len(analyzed_docs)} → {config.output_dir}")
 
 
+def cmd_x_analyze(
+    window: int = 5,
+    max_age_days: int | None = None,
+    *,
+    limit: int | None = None,
+    model: str | None = None,
+    head_model: str | None = None,
+    batch_model: str | None = None,
+    batch_size: int = 20,
+    max_concurrent: int = 5,
+    max_api_calls: int | None = None,
+    llm_max_retries: int = 3,
+    synth_group_size: int = 5,
+    api_key: str | None = None,
+    base_url: str | None = None,
+) -> Path:
+    """
+    合并最近 window 个 Twitter 快照，使用 XAnalyst 输出一句话总结。
+
+    Returns:
+        报告文件路径；若无可用帖子则返回 Path()。
+    """
+    _, items = _load_snapshots(window, max_age_days, sources="twitter")
+    posts = _prepare_x_analyst_posts(items, limit=limit)
+    if not posts:
+        logger.warning("no twitter posts available, abort x_analyst")
+        return Path()
+
+    (
+        analyze_x_posts,
+        resolve_model_config,
+        resolve_api_key,
+        resolve_base_url,
+        AsyncOpenAI,
+    ) = _load_x_analyst_modules()
+
+    model_config = resolve_model_config(model, head_model, batch_model)
+    resolved_api_key = resolve_api_key(api_key, model_config)
+    if not resolved_api_key:
+        raise ValueError("需要 OPENAI_API_KEY / MINIMAX_API_KEY 环境变量或 --api-key 参数")
+
+    client_kwargs: dict[str, str] = {"api_key": resolved_api_key}
+    resolved_base_url = resolve_base_url(base_url, model_config)
+    if resolved_base_url:
+        client_kwargs["base_url"] = resolved_base_url
+
+    logger.info(
+        "XAnalyst start | posts={} window={} batch_model={} head_model={}".format(
+            len(posts),
+            window,
+            model_config.batch_model,
+            model_config.head_model,
+        )
+    )
+
+    client = AsyncOpenAI(**client_kwargs)
+    summary = asyncio.run(
+        analyze_x_posts(
+            posts=posts,
+            client=client,
+            model_config=model_config,
+            batch_size=batch_size,
+            max_concurrent=max_concurrent,
+            max_api_calls=max_api_calls,
+            llm_max_retries=llm_max_retries,
+            synth_group_size=synth_group_size,
+        )
+    )
+
+    report_path = _save_x_analyst_report(
+        summary,
+        posts,
+        window=window,
+        max_age_days=max_age_days,
+        model_config=model_config,
+    )
+    logger.info(f"XAnalyst done | posts={len(posts)} report={report_path}")
+    logger.info(f"XAnalyst summary | {summary or '<empty>'}")
+    return report_path
+
+
 def cmd_zhihu_analyze(
     window: int = 5,
     max_age_days: int | None = None,
@@ -444,6 +611,29 @@ def cmd_zhihu_analyze(
     from pipeline_io import load_docs as _load_docs_for_stats
     analyzed_docs = _load_docs_for_stats(config.input_json)
     logger.info(f"zhihu pipeline done | docs={len(analyzed_docs)} → {config.output_dir}")
+
+
+def _add_x_analyst_args(parser) -> None:
+    parser.add_argument("--window", type=int, default=5)
+    parser.add_argument("--max-age-days", type=int, metavar="D")
+    parser.add_argument("--limit", type=int, default=None, metavar="N",
+                        help="仅分析前 N 条帖子，便于低成本测试")
+    parser.add_argument("--model", default=None, metavar="MODEL",
+                        help="所有阶段统一使用的模型")
+    parser.add_argument("--head-model", default=None, metavar="MODEL",
+                        help="汇总阶段模型，覆盖 --model")
+    parser.add_argument("--batch-model", default=None, metavar="MODEL",
+                        help="批分析阶段模型，覆盖 --model")
+    parser.add_argument("--batch-size", type=int, default=20, metavar="N")
+    parser.add_argument("--max-concurrent", type=int, default=5, metavar="N")
+    parser.add_argument("--max-api-calls", type=int, default=None, metavar="N")
+    parser.add_argument("--llm-max-retries", type=int, default=3, metavar="N")
+    parser.add_argument("--synth-group-size", type=int, default=5, metavar="N")
+    if "--api-key" not in parser._option_string_actions:
+        parser.add_argument("--api-key", default=None, metavar="KEY",
+                            help="API Key，默认读取 OPENAI_API_KEY / MINIMAX_API_KEY")
+    parser.add_argument("--base-url", default=None, metavar="URL",
+                        help="OpenAI 兼容接口地址，默认读取 OPENAI_BASE_URL / OPENAI_URL / MINIMAX_BASE_URL")
 
 
 # ─── 多信源调度：sources.yaml 驱动 ───────────────────────────────────────────
@@ -775,6 +965,10 @@ def main() -> None:
                            help="快照前缀过滤：'*'=全部, 'twitter', 'mindspider', 'zhihu'（默认 *）")
     p_analyze.add_argument("--pipeline-args", nargs=argparse.REMAINDER, default=[])
 
+    # --- x-analyze ---
+    p_x_analyze = subparsers.add_parser("x-analyze", help="合并 Twitter 快照并运行 XAnalyst")
+    _add_x_analyst_args(p_x_analyze)
+
     # --- mindspider ---
     p_ms = subparsers.add_parser(
         "mindspider",
@@ -821,6 +1015,17 @@ def main() -> None:
     p_all.add_argument("--sources", default="*",
                        help="分析时的快照前缀过滤（默认 *）")
     p_all.add_argument("--pipeline-args", nargs=argparse.REMAINDER, default=[])
+
+    # --- x-all ---
+    p_x_all = subparsers.add_parser("x-all", help="抓取 Twitter 快照并运行 XAnalyst")
+    p_x_all.add_argument("--usernames", nargs="+")
+    p_x_all.add_argument("--from-yaml", action="store_true")
+    p_x_all.add_argument("--sample", type=int, metavar="N")
+    p_x_all.add_argument("--max-tweets", type=int, default=10)
+    p_x_all.add_argument("--translate", action="store_true", default=False,
+                         help="对非英文 original 推文调用翻译 API")
+    p_x_all.add_argument("--api-key", default=os.getenv("TWTAPI_KEY"))
+    _add_x_analyst_args(p_x_all)
 
     # --- zhihu-crawl ---
     p_zhihu_crawl = subparsers.add_parser("zhihu-crawl", help="抓取知乎问题，写时间戳快照")
@@ -951,6 +1156,23 @@ def main() -> None:
             sources=args.sources,
         )
 
+    elif args.cmd == "x-analyze":
+        cmd_x_analyze(
+            window=args.window,
+            max_age_days=args.max_age_days,
+            limit=args.limit,
+            model=args.model,
+            head_model=args.head_model,
+            batch_model=args.batch_model,
+            batch_size=args.batch_size,
+            max_concurrent=args.max_concurrent,
+            max_api_calls=args.max_api_calls,
+            llm_max_retries=args.llm_max_retries,
+            synth_group_size=args.synth_group_size,
+            api_key=args.api_key,
+            base_url=args.base_url,
+        )
+
     elif args.cmd == "all":
         if not args.api_key:
             parser.error("请设置 TWTAPI_KEY 或通过 --api-key 传入")
@@ -961,6 +1183,27 @@ def main() -> None:
             max_age_days=args.max_age_days,
             pipeline_argv=getattr(args, "pipeline_args", []),
             sources=args.sources,
+        )
+
+    elif args.cmd == "x-all":
+        if not args.api_key:
+            parser.error("请设置 TWTAPI_KEY 或通过 --api-key 传入")
+        usernames = resolve_usernames(args)
+        cmd_crawl(usernames, args.api_key, args.max_tweets, args.translate)
+        cmd_x_analyze(
+            window=args.window,
+            max_age_days=args.max_age_days,
+            limit=args.limit,
+            model=args.model,
+            head_model=args.head_model,
+            batch_model=args.batch_model,
+            batch_size=args.batch_size,
+            max_concurrent=args.max_concurrent,
+            max_api_calls=args.max_api_calls,
+            llm_max_retries=args.llm_max_retries,
+            synth_group_size=args.synth_group_size,
+            api_key=args.api_key,
+            base_url=args.base_url,
         )
 
     elif args.cmd == "zhihu-crawl":
