@@ -40,6 +40,7 @@ def parse_answer(data: dict[str, Any], question_id: str | None = None) -> ZhihuA
     
     # 基础信息
     item["post_id"] = str(data.get("id", ""))
+    item["record_id"] = f"zhihu:{item['post_id']}" if item["post_id"] else ""
     
     # 作者信息
     author = data.get("author", {})
@@ -53,7 +54,11 @@ def parse_answer(data: dict[str, Any], question_id: str | None = None) -> ZhihuA
     # 链接
     aid = item["post_id"]
     qid = question_id or data.get("question", {}).get("id", "")
-    item["url"] = f"https://www.zhihu.com/question/{qid}/answer/{aid}" if qid and aid else ""
+    if not qid:
+        qid = extract_question_id_from_url(str(data.get("url", "") or "")) or ""
+    item["url"] = str(data.get("url", "") or "")
+    if not item["url"] and qid and aid:
+        item["url"] = f"https://www.zhihu.com/question/{qid}/answer/{aid}"
     
     # 内容处理
     content_html = data.get("content", "")
@@ -71,11 +76,21 @@ def parse_answer(data: dict[str, Any], question_id: str | None = None) -> ZhihuA
     # 问题信息
     question = data.get("question", {})
     item["question_id"] = str(question.get("id", "")) if isinstance(question, dict) else str(qid)
+    if not item["question_id"]:
+        item["question_id"] = str(qid)
     item["question_title"] = question.get("title", "") if isinstance(question, dict) else ""
-    
+
     # 统计信息
     item["voteup_count"] = data.get("voteup_count", 0) or data.get("votes_up", 0) or 0
+    item["like_count"] = item["voteup_count"]
+    item["share_count"] = 0
     item["comment_count"] = data.get("comment_count", 0) or 0
+    item["source_platform"] = "zhihu"
+    item["source_extractor"] = "zhihu_api"
+    item["content_type"] = "answer"
+    item["tweet_type"] = "original"
+    item["rt_author"] = None
+    item["is_truncated"] = False
     
     # 预处理字段（由 Pipeline 填充）
     item["clean_text"] = ""
@@ -100,6 +115,7 @@ def parse_article(data: dict[str, Any]) -> ZhihuArticleItem:
     
     # 基础信息
     item["post_id"] = str(data.get("id", ""))
+    item["record_id"] = f"zhihu:{item['post_id']}" if item["post_id"] else ""
     
     # 作者信息
     author = data.get("author", {})
@@ -123,7 +139,15 @@ def parse_article(data: dict[str, Any]) -> ZhihuArticleItem:
     
     # 统计信息
     item["voteup_count"] = data.get("voteup_count", 0) or data.get("votes_up", 0) or 0
+    item["like_count"] = item["voteup_count"]
+    item["share_count"] = 0
     item["comment_count"] = data.get("comment_count", 0) or 0
+    item["source_platform"] = "zhihu"
+    item["source_extractor"] = "zhihu_api"
+    item["content_type"] = "article"
+    item["tweet_type"] = "original"
+    item["rt_author"] = None
+    item["is_truncated"] = False
     
     # 预处理字段
     item["clean_text"] = ""
@@ -186,6 +210,17 @@ def extract_answer_id_from_url(url: str) -> str | None:
         return None
 
     match = re.search(r"/answer/(\d+)", url)
+    if match:
+        return match.group(1)
+    return None
+
+
+def extract_article_id_from_url(url: str) -> str | None:
+    """从知乎专栏文章 URL 中提取 article id。"""
+    if not url:
+        return None
+
+    match = re.search(r"(?:zhuanlan\.)?zhihu\.com/p/(\d+)", url)
     if match:
         return match.group(1)
     return None

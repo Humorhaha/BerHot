@@ -10,6 +10,7 @@ class ZhihuAnswerItem(scrapy.Item):
     """一条知乎回答，字段对齐 twitter_crawler 输出格式"""
     # —— 核心标识 ——
     post_id = scrapy.Field()       # answer_id (str)
+    record_id = scrapy.Field()     # 全局去重ID，格式 zhihu:{post_id}
     author = scrapy.Field()        # 用户名
     author_token = scrapy.Field()  # url_token（知乎特有）
     date = scrapy.Field()          # created_time ISO 8601
@@ -24,8 +25,16 @@ class ZhihuAnswerItem(scrapy.Item):
     question_id = scrapy.Field()
     question_title = scrapy.Field()
     voteup_count = scrapy.Field()
+    like_count = scrapy.Field()
+    share_count = scrapy.Field()
     comment_count = scrapy.Field()
     updated_time = scrapy.Field()
+    source_platform = scrapy.Field()
+    source_extractor = scrapy.Field()
+    content_type = scrapy.Field()
+    tweet_type = scrapy.Field()
+    rt_author = scrapy.Field()
+    is_truncated = scrapy.Field()
 
     # —— 预处理保留字段（由 Pipeline 填充）——
     clean_text = scrapy.Field()
@@ -37,6 +46,7 @@ class ZhihuAnswerItem(scrapy.Item):
 class ZhihuArticleItem(scrapy.Item):
     """一条知乎专栏文章"""
     post_id = scrapy.Field()
+    record_id = scrapy.Field()
     author = scrapy.Field()
     author_token = scrapy.Field()
     date = scrapy.Field()
@@ -45,8 +55,16 @@ class ZhihuArticleItem(scrapy.Item):
     content_html = scrapy.Field()
     title = scrapy.Field()
     voteup_count = scrapy.Field()
+    like_count = scrapy.Field()
+    share_count = scrapy.Field()
     comment_count = scrapy.Field()
     updated_time = scrapy.Field()
+    source_platform = scrapy.Field()
+    source_extractor = scrapy.Field()
+    content_type = scrapy.Field()
+    tweet_type = scrapy.Field()
+    rt_author = scrapy.Field()
+    is_truncated = scrapy.Field()
     clean_text = scrapy.Field()
     urls = scrapy.Field()
     lang = scrapy.Field()
