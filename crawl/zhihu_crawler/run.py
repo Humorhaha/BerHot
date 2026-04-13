@@ -20,7 +20,49 @@ import subprocess
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from zhihu.providers.firecrawl import FirecrawlConfig, ZhihuFirecrawlCrawler, load_question_targets
+
+
+def _repo_root_from_gitfile(project_dir: Path) -> Path | None:
+    gitfile = project_dir / ".git"
+    if not gitfile.is_file():
+        return None
+    try:
+        content = gitfile.read_text(encoding="utf-8").strip()
+    except Exception:
+        return None
+    if not content.startswith("gitdir:"):
+        return None
+    gitdir = Path(content.split(":", 1)[1].strip()).expanduser()
+    if not gitdir.is_absolute():
+        gitdir = (project_dir / gitdir).resolve()
+    if "worktrees" not in gitdir.parts:
+        return None
+    try:
+        return gitdir.parents[2]
+    except IndexError:
+        return None
+
+
+def _load_env_chain() -> None:
+    here = Path(__file__).resolve().parent
+    # 1) zhihu_crawler/.env
+    load_dotenv(dotenv_path=here / ".env")
+    # 2) worktree 项目根 .env
+    project_env = here.parents[1] / ".env"
+    if project_env.exists():
+        load_dotenv(dotenv_path=project_env, override=False)
+    # 3) 仓库根 .env（worktree 场景）
+    repo_root = _repo_root_from_gitfile(here.parents[1])
+    if repo_root and repo_root != here.parents[1]:
+        repo_env = repo_root / ".env"
+        if repo_env.exists():
+            load_dotenv(dotenv_path=repo_env, override=False)
+
+
+_load_env_chain()
 
 
 def get_cookie_from_auth() -> str:

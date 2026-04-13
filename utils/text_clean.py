@@ -13,7 +13,10 @@ from __future__ import annotations
 
 import re
 
-import emoji
+try:
+    import emoji
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    emoji = None
 
 # t.co 短链 + 通用 URL
 _URL_RE = re.compile(r"https?://\S+", re.UNICODE)
@@ -43,7 +46,15 @@ def remove_emoji(text: str) -> str:
     >>> remove_emoji("Hello 🤖 world 🌍")
     'Hello  world '
     """
-    return emoji.replace_emoji(text, replace="")
+    if emoji is not None:
+        return emoji.replace_emoji(text, replace="")
+
+    # fallback: 覆盖常见 emoji / pictograph unicode block
+    return re.sub(
+        r"[\U0001F1E0-\U0001F1FF\U0001F300-\U0001FAFF\U00002700-\U000027BF\U0000FE00-\U0000FE0F]",
+        "",
+        text,
+    )
 
 
 def clean_text(raw: str) -> tuple[str, list[str]]:

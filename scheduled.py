@@ -77,12 +77,43 @@ from twitter_crawler import (
     fetch_multiple_users,
     save_json,
 )
-from pipeline import run_pipeline
-from pipeline_config import parse_config
 from utils.user_utils import _extract_username, load_usernames_from_yaml
-from utils.preprocess import second_pass
 
-load_dotenv(dotenv_path=PROJECT_DIR / ".env")
+
+def _repo_root_from_gitfile(project_dir: Path) -> Path | None:
+    gitfile = project_dir / ".git"
+    if not gitfile.is_file():
+        return None
+    try:
+        content = gitfile.read_text(encoding="utf-8").strip()
+    except Exception:
+        return None
+    if not content.startswith("gitdir:"):
+        return None
+    gitdir = Path(content.split(":", 1)[1].strip()).expanduser()
+    if not gitdir.is_absolute():
+        gitdir = (project_dir / gitdir).resolve()
+    # worktree gitdir 形如 <repo>/.git/worktrees/<name>
+    parts = gitdir.parts
+    if "worktrees" not in parts:
+        return None
+    try:
+        return gitdir.parents[2]
+    except IndexError:
+        return None
+
+
+def _load_env_chain(project_dir: Path) -> None:
+    """优先加载 worktree .env，其次回退加载仓库根 .env。"""
+    load_dotenv(dotenv_path=project_dir / ".env")
+    repo_root = _repo_root_from_gitfile(project_dir)
+    if repo_root and repo_root != project_dir:
+        fallback_env = repo_root / ".env"
+        if fallback_env.exists():
+            load_dotenv(dotenv_path=fallback_env, override=False)
+
+
+_load_env_chain(PROJECT_DIR)
 
 SNAPSHOT_DIR         = PROJECT_DIR / "data" / "snapshots"
 LOGS_DIR             = PROJECT_DIR / "logs"
@@ -130,6 +161,8 @@ def cmd_crawl(
     if not raw_tweets:
         logger.warning("no tweets fetched, skip snapshot")
         return Path()
+
+    from utils.preprocess import second_pass
 
     # second_pass：过滤截断RT、清洗、语言检测、可选翻译
     tweets = second_pass(raw_tweets, translate=translate)
@@ -193,6 +226,8 @@ def cmd_crawl_mindspider(
         logger.warning("[mindspider] DB 中无有效数据，跳过快照")
         return Path()
 
+    from utils.preprocess import second_pass
+
     # second_pass：清洗、语言检测、可选翻译（与 Twitter 流程一致）
     records = second_pass(records, translate=translate)
     if not records:
@@ -225,7 +260,25 @@ def cmd_zhihu_crawl(
     crawler = ZhihuFirecrawlCrawler(config)
     payload = crawler.crawl_questions(questions, max_answers=max_answers)
     if payload["total_count"] == 0:
-        logger.warning("no zhihu answers fetched, skip snapshot")
+        manifest_path = crawler.last_manifest_path
+        logger.warning(
+            "no zhihu answers fetched, skip snapshot | manifest={}",
+            manifest_path if manifest_path else "unknown",
+        )
+        questions_meta = (crawler.last_manifest or {}).get("questions", [])
+        for meta in questions_meta[:10]:
+            logger.warning(
+                "zhihu empty result | qid={} | mode={} | displayed={} | discovered={} | fetched={} | partial={}{}{}{}",
+                meta.get("question_id"),
+                meta.get("discovery_mode", "unknown"),
+                meta.get("displayed_count"),
+                meta.get("discovered_count"),
+                meta.get("fetched_count"),
+                meta.get("partial"),
+                f" | error={meta.get('error')}" if meta.get("error") else "",
+                f" | warning={meta.get('warning')}" if meta.get("warning") else "",
+                f" | batch_error={meta.get('batch_error')}" if meta.get("batch_error") else "",
+            )
         return Path()
     snapshot_path = crawler.last_export_paths.get("snapshot", Path())
     logger.info(f"zhihu crawl done | answers={payload['total_count']} snapshot={snapshot_path}")
@@ -326,6 +379,9 @@ def cmd_analyze(
         logger.warning("no docs available, abort analysis")
         return
 
+    from pipeline import run_pipeline
+    from pipeline_config import parse_config
+
     # 合并输出文件名：全量合并用 merged_texts.json，单信源保留原名
     if sources == "*":
         merged_json = PROJECT_DIR / "data" / "merged_texts.json"
@@ -366,6 +422,9 @@ def cmd_zhihu_analyze(
     if not docs:
         logger.warning("no zhihu docs available, abort analysis")
         return
+
+    from pipeline import run_pipeline
+    from pipeline_config import parse_config
 
     merged_json = PROJECT_DIR / "data" / "zhihu_texts.json"
     for item in items:
