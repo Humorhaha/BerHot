@@ -12,6 +12,7 @@ agent_tree — AgentAttentionTree 舆情分析框架
 
 from .models import Signal, AgentSummary, MeetingResult, PlatformSummary, FinalReport, ModelConfig
 from .pipeline import run_aat
+from .x_analyst import XAnalyst, analyze_x_posts
 
 __all__ = [
     "Signal",
@@ -21,4 +22,6 @@ __all__ = [
     "FinalReport",
     "ModelConfig",
     "run_aat",
+    "XAnalyst",
+    "analyze_x_posts",
 ]
